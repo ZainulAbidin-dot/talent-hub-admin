@@ -7,7 +7,7 @@ import { Map, InfoWindow, Marker, GoogleApiWrapper } from "google-maps-react";
 import { useGetGeographyQuery } from 'state/api';
 
 const LiveRides = (props) => {
-  
+
   const theme = useTheme(); // Assuming you pass the theme as a prop
   const { data } = useGetGeographyQuery();
 
@@ -18,7 +18,7 @@ const LiveRides = (props) => {
   });
 
   const onMarkerClick = (props, marker) => {
-    console.log("first")
+    console.log("Opening Info Window");
     setMapState({
       selectedPlace: props,
       activeMarker: marker,
@@ -27,6 +27,7 @@ const LiveRides = (props) => {
   };
 
   const onInfoWindowClose = () => {
+    console.log("Closing Info Window");
     setMapState({
       activeMarker: null,
       showingInfoWindow: false,
@@ -41,37 +42,31 @@ const LiveRides = (props) => {
         height="75vh"
         border={`1px solid ${theme.palette.secondary[200]}`}
         borderRadius="4px"
+        style={{ position: 'relative' }}
       >
-        {data ? (
-          <div style={{ height: "100%", width: "100%" }}>
-          <Map
-            google={props.google}
-            zoom={11}
-            initialCenter={{
-              lat: 24.958, // Specify the initial latitude
-              lng: 67.057, // Specify the initial longitude
-            }}
+        <Map
+          google={props.google}
+          zoom={11}
+          initialCenter={{
+            lat: 24.958, // Specify the initial latitude
+            lng: 67.057, // Specify the initial longitude
+          }}
+        >
+          <Marker
+            onClick={() => onMarkerClick("Current location", { lat: 24.958425, lng: 67.057989 })}
+            name={"Current location"}
+            position={{ lat: 24.958425, lng: 67.057989 }} // Specify marker position
+          />
+          <InfoWindow
+            onClose={onInfoWindowClose}
+            marker={mapState.activeMarker}
+            visible={mapState.showingInfoWindow}
           >
-            <Marker
-              onClick={() => onMarkerClick("Current location", { lat: 24.958425, lng: 67.057989 }, true)}
-              name={"Current location"}
-              position={{ lat: 24.958425, lng: 67.057989 }} // Specify marker position
-            />
-
-            <InfoWindow
-              onClose={() => onInfoWindowClose}
-              marker={mapState.activeMarker}
-              visible={mapState.showingInfoWindow}
-            >
-              <div>
-                <h1>{"Current Place"}</h1>
-              </div>
-            </InfoWindow>
-          </Map>
-          </div>
-        ) : (
-          <>Loading...</>
-        )}
+            <div>
+              <h1>{mapState.selectedPlace?.name ?? 'Default'}</h1>
+            </div>
+          </InfoWindow>
+        </Map>
       </Box>
     </Box>
   );
