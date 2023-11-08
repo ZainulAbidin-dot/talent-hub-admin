@@ -18041,13 +18041,13 @@ export const dataUser = [
   },
   {
     _id: "63701cc1f03239b7f700000e",
-    name: "Shelly",
+    name: "Shahzaib",
     email: "swelbeck12@ycombinator.com",
     password: "RSjzmAjnq",
     city: "Sangoleng",
     state: null,
     country: "ID",
-    occupation: "Pharmacist",
+    occupation: "Admin",
     phoneNumber: "7036619983",
     transactions: [
       "63701d74f03239d81e000027",
@@ -18142,7 +18142,7 @@ export const dataUser = [
     city: "Xingpinglu",
     state: null,
     country: "CN",
-    occupation: "Pharmacist",
+    occupation: "Admin",
     phoneNumber: "6998313608",
     transactions: [
       "63701d74f032394441000301",
@@ -19255,7 +19255,7 @@ export const dataUser = [
     city: "Néa Smýrni",
     state: null,
     country: "GR",
-    occupation: "Pharmacist",
+    occupation: "Admin",
     phoneNumber: "6037858916",
     transactions: [
       "63701d74f03239444100031b",

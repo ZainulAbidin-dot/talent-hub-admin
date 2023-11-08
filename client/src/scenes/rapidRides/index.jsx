@@ -6,7 +6,7 @@ import { DataGrid } from "@mui/x-data-grid";
 import Header from "components/Header";
 import CustomColumnMenu from "components/DataGridCustomColumnMenu";
 
-const Performance = () => {
+const RapidRides = () => {
   const theme = useTheme();
   const userId = useSelector((state) => state.global.userId);
   const { data, isLoading } = useGetUserPerformanceQuery(userId);
@@ -90,4 +90,4 @@ const Performance = () => {
   );
 };
 
-export default Performance;
+export default RapidRides;

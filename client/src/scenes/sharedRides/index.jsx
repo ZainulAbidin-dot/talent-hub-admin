@@ -5,7 +5,7 @@ import { DataGrid } from "@mui/x-data-grid";
 import Header from "components/Header";
 import CustomColumnMenu from "components/DataGridCustomColumnMenu";
 
-const Admin = () => {
+const SharedRides = () => {
   const theme = useTheme();
   const { data, isLoading } = useGetAdminsQuery();
 
@@ -95,4 +95,4 @@ const Admin = () => {
   );
 };
 
-export default Admin;
+export default SharedRides;
