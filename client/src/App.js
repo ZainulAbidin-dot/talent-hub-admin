@@ -7,6 +7,7 @@ import { themeSettings } from "theme";
 import Layout from "scenes/layout";
 import Dashboard from "scenes/dashboard";
 import Reviews from "scenes/reviews";
+import SingleCustomer from "scenes/singleCustomer";
 import Customers from "scenes/customers";
 import Transactions from "scenes/transactions";
 import LiveRides from "scenes/liveRides";
@@ -16,6 +17,7 @@ import Monthly from "scenes/monthly";
 import Breakdown from "scenes/breakdown";
 import SharedRides from "scenes/sharedRides";
 import RapidRides from "scenes/rapidRides";
+import SingleRide from 'scenes/singleRide';
 
 function App() {
   const mode = useSelector((state) => state.global.mode);
@@ -30,7 +32,10 @@ function App() {
               <Route path="/" element={<Navigate to="/dashboard" replace />} />
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/reviews" element={<Reviews />} />
-              <Route path="/customers" element={<Customers />} />
+              <Route path="/drivers" element={<Customers userType={"Drivers"} role={"driver"} />} />
+              <Route path="/passengers" element={<Customers userType={"Passengers"} role={"passenger"} />} />
+              <Route path="/single-customer/:id" element={<SingleCustomer />} />
+              <Route path="/single-ride/:id" element={<SingleRide />} />
               <Route path="/transactions" element={<Transactions />} />
               <Route path="/live-rides" element={<LiveRides />} />
               <Route path="/overview" element={<Overview />} />

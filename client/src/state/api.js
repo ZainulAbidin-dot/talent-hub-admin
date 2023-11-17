@@ -1,12 +1,23 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { useSelector } from 'react-redux';
+
+const SetBaseUrl = () => {
+  const baseUrl = useSelector((state) => state.global.baseUrl);
+  return (baseUrl);
+}
 
 export const api = createApi({
-  baseQuery: fetchBaseQuery({ baseUrl: 'http://localhost:9000/' }),
+  baseQuery: fetchBaseQuery({ baseUrl: localStorage.getItem("baseUrl") || <SetBaseUrl /> }),
   reducerPath: "adminApi",
   tagTypes: [
     "User",
     "Products",
     "Customers",
+    "SingleCustomer",
+    "SingleRide",
+    "SharedRides",
+    "RapidRides",
+    "LiveRides",
     "Transactions",
     "Geography",
     "Sales",
@@ -16,7 +27,7 @@ export const api = createApi({
   ],
   endpoints: (build) => ({
     getUser: build.query({
-      query: (id) => `general/user/${id}`,
+      query: (id) => `admin/users/${id}`,
       providesTags: ["User"],
     }),
     getProducts: build.query({
@@ -24,14 +35,39 @@ export const api = createApi({
       providesTags: ["Products"],
     }),
     getCustomers: build.query({
-      query: () => "client/customers",
+      query: (role) => `admin/users?role=${role}`,
       providesTags: ["Customers"],
+    }),
+    getSingleCustomer: build.query({
+      query: (id) => `admin/users/${id}`,
+      providesTags: ["SingleCustomer"],
+    }),
+    getSingleRide: build.query({
+      query: ({ id, type }) => {
+        return {
+          url: type === "sharedExpress" ? `admin/shared-rides/${id}` : `admin/rapid-rides/${id}`,
+          method: "GET",
+        }
+      },
+      providesTags: ["SingleRide"],
+    }),
+    getSharedRides: build.query({
+      query: ({ page = 0, pageSize = 0, sort = 0, search = "a" }) => `admin/shared-rides`,
+      providesTags: ["SharedRides"],
+    }),
+    getRapidRides: build.query({
+      query: ({ page = 0, pageSize = 0, sort = 0, search = "a" }) => `admin/rapid-rides`,
+      providesTags: ["RapidRides"],
+    }),
+    getLiveRides: build.query({
+      query: () => `admin/active-rides`,
+      providesTags: ["LiveRides"],
     }),
     getTransactions: build.query({
       query: ({ page, pageSize, sort, search }) => ({
-        url: "client/transactions",
+        url: "admin/fares",
         method: "GET",
-        params: { page, pageSize, sort, search },
+        // params: { page, pageSize, sort, search },
       }),
       providesTags: ["Transactions"],
     }),
@@ -62,6 +98,11 @@ export const {
   useGetUserQuery,
   useGetProductsQuery,
   useGetCustomersQuery,
+  useGetSingleCustomerQuery,
+  useGetSingleRideQuery,
+  useGetSharedRidesQuery,
+  useGetRapidRidesQuery,
+  useGetLiveRidesQuery,
   useGetTransactionsQuery,
   useGetGeographyQuery,
   useGetSalesQuery,

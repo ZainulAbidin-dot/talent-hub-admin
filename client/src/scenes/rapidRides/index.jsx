@@ -1,25 +1,84 @@
-import React from "react";
+import React, { useState } from "react";
 import { Box, useTheme } from "@mui/material";
-import { useGetUserPerformanceQuery } from "state/api";
-import { useSelector } from "react-redux";
-import { DataGrid } from "@mui/x-data-grid";
+import { DataGrid, GridActionsCellItem } from "@mui/x-data-grid";
+import { useGetRapidRidesQuery } from "state/api";
 import Header from "components/Header";
-import CustomColumnMenu from "components/DataGridCustomColumnMenu";
+import DataGridCustomToolbar from "components/DataGridCustomToolbar";
+import { useNavigate } from "react-router-dom";
+import VisibilityIcon from "@mui/icons-material/Visibility";
 
 const RapidRides = () => {
   const theme = useTheme();
-  const userId = useSelector((state) => state.global.userId);
-  const { data, isLoading } = useGetUserPerformanceQuery(userId);
 
+  // values to be sent to the backend
+  const [page, setPage] = useState(0);
+  const [pageSize, setPageSize] = useState(20);
+  const [sort, setSort] = useState({});
+  const [search, setSearch] = useState("");
+  const navigate = useNavigate();
+
+  const [searchInput, setSearchInput] = useState("");
+  const { data, isLoading } = useGetRapidRidesQuery({
+    page,
+    pageSize,
+    sort: JSON.stringify(sort),
+    search,
+  });
+
+  const reformedData = data?.data?.rides?.map((rapidRide) => {
+    return {
+      _id: rapidRide.id,
+      driverName: rapidRide.driver.name,
+      passengerName: rapidRide.passenger.name,
+      driverPhoneNumber: rapidRide.driver.phoneNumber,
+      driverId: rapidRide.driver.id,
+      passengerId: rapidRide.passenger.id,
+      fare: rapidRide.fare,
+      paymentMethod: rapidRide.paymentMethod,
+      status: rapidRide.status,
+      createdAt: rapidRide.createdAt,
+    };
+  });
+
+  console.log(reformedData);
+
+  const handleViewClick = (id) => {
+    navigate(`/single-customer/${id}`, { state: { customerId: id } });
+  };
   const columns = [
     {
       field: "_id",
       headerName: "ID",
+      flex: 2,
+    },
+    {
+      field: "driverName",
+      headerName: "Driver Name",
       flex: 1,
     },
     {
-      field: "userId",
-      headerName: "User ID",
+      field: "passengerName",
+      headerName: "Passenger Name",
+      flex: 1,
+    },
+    {
+      field: "driverPhoneNumber",
+      headerName: "Driver Phone Number",
+      flex: 1,
+    },
+    {
+      field: "fare",
+      headerName: "Total Fare",
+      flex: 0.5,
+    },
+    {
+      field: "paymentMethod",
+      headerName: "Payment Method",
+      flex: 1,
+    },
+    {
+      field: "status",
+      headerName: "Status",
       flex: 1,
     },
     {
@@ -28,29 +87,50 @@ const RapidRides = () => {
       flex: 1,
     },
     {
-      field: "products",
-      headerName: "# of Products",
-      flex: 0.5,
-      sortable: false,
-      renderCell: (params) => params.value.length,
+      field: "actions",
+      type: "actions",
+      headerName: "Driver Details",
+      flex: 1,
+      cellClassName: "actions",
+
+      getActions: (params) => {
+        return [
+          <GridActionsCellItem
+            icon={<VisibilityIcon />}
+            label="View"
+            className="textPrimary"
+            onClick={() => handleViewClick(params.row.driverId)}
+            color="inherit"
+          />,
+        ];
+      },
     },
     {
-      field: "cost",
-      headerName: "Cost",
+      field: "actions2",
+      type: "actions",
+      headerName: "Passenger Details",
       flex: 1,
-      renderCell: (params) => `$${Number(params.value).toFixed(2)}`,
+      cellClassName: "actions",
+
+      getActions: (params) => {
+        return [
+          <GridActionsCellItem
+            icon={<VisibilityIcon />}
+            label="View"
+            className="textPrimary"
+            onClick={() => handleViewClick(params.row.passengerId)}
+            color="inherit"
+          />,
+        ];
+      },
     },
   ];
 
   return (
     <Box m="1.5rem 2.5rem">
-      <Header
-        title="PERFORMANCE"
-        subtitle="Track your Affiliate Sales Performance Here"
-      />
+      <Header title="RAPID RIDES" subtitle="Entire list of Rapid Rides" />
       <Box
-        mt="40px"
-        height="75vh"
+        height="80vh"
         sx={{
           "& .MuiDataGrid-root": {
             border: "none",
@@ -77,12 +157,33 @@ const RapidRides = () => {
         }}
       >
         <DataGrid
-          loading={isLoading || !data}
+          loading={reformedData && reformedData.length > 0 ? false : true}
           getRowId={(row) => row._id}
-          rows={(data && data.sales) || []}
+          rows={
+            (reformedData && reformedData.length > 0 ? reformedData : []) || []
+          }
           columns={columns}
-          components={{
-            ColumnMenu: CustomColumnMenu,
+          rowCount={(reformedData && reformedData.length) || 0}
+          rowsPerPageOptions={[20, 50, 100]}
+          pagination
+          page={page}
+          pageSize={pageSize}
+          paginationMode="server"
+          sortingMode="server"
+          onPageChange={(newPage) => setPage(newPage)}
+          onPageSizeChange={(newPageSize) => setPageSize(newPageSize)}
+          onSortModelChange={(newSortModel) => setSort(...newSortModel)}
+          components={{ Toolbar: DataGridCustomToolbar }}
+          componentsProps={{
+            toolbar: { searchInput, setSearchInput, setSearch },
+          }}
+          initialState={{
+            columns: {
+              columnVisibilityModel: {
+                driverPhoneNumber: false,
+                createdAt: false,
+              },
+            },
           }}
         />
       </Box>

@@ -91,7 +91,7 @@ const Reviews = () => {
 
   return (
     <Box m="1.5rem 2.5rem">
-      <Header title="Rides" subtitle="See your list of reviews." />
+      <Header title="REVIEWS" subtitle="See your list of reviews" />
       {data || !isLoading ? (
         <Box
           mt="20px"

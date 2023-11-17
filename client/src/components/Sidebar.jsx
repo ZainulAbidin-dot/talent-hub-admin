@@ -40,11 +40,11 @@ const navItems = [
     icon: null,
   },
   {
-    text: "Reviews",
-    icon: <ShoppingCartOutlined />,
+    text: "Drivers",
+    icon: <Groups2Outlined />,
   },
   {
-    text: "Customers",
+    text: "Passengers",
     icon: <Groups2Outlined />,
   },
   {
@@ -54,6 +54,22 @@ const navItems = [
   {
     text: "Live-Rides",
     icon: <PublicOutlined />,
+  },
+  {
+    text: "Reviews",
+    icon: <ShoppingCartOutlined />,
+  },
+  {
+    text: "Rides",
+    icon: null,
+  },
+  {
+    text: "Shared-Rides",
+    icon: <AdminPanelSettingsOutlined />,
+  },
+  {
+    text: "Rapid-Rides",
+    icon: <TrendingUpOutlined />,
   },
   {
     text: "Sales",
@@ -74,18 +90,6 @@ const navItems = [
   {
     text: "Breakdown",
     icon: <PieChartOutlined />,
-  },
-  {
-    text: "Rides",
-    icon: null,
-  },
-  {
-    text: "Shared-Rides",
-    icon: <AdminPanelSettingsOutlined />,
-  },
-  {
-    text: "Rapid-Rides",
-    icon: <TrendingUpOutlined />,
   },
 ];
 
@@ -129,7 +133,7 @@ const Sidebar = ({
               <FlexBetween color={theme.palette.secondary.main}>
                 <Box display="flex" alignItems="center" gap="0.5rem">
                   <Typography variant="h4" fontWeight="bold">
-                    PIRAYO
+                    PIRAYO ADMIN
                   </Typography>
                 </Box>
                 {!isNonMobile && (

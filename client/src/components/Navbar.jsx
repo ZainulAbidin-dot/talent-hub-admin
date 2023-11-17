@@ -9,7 +9,7 @@ import {
 } from "@mui/icons-material";
 import FlexBetween from "components/FlexBetween";
 import { useDispatch } from "react-redux";
-import { setMode } from "state";
+import { setBaseUrl, setMode } from "state";
 import profileImage from "assets/profile.jpeg";
 import {
   AppBar,
@@ -29,9 +29,21 @@ const Navbar = ({ user, isSidebarOpen, setIsSidebarOpen }) => {
   const theme = useTheme();
 
   const [anchorEl, setAnchorEl] = useState(null);
+  const [anchorEl2, setAnchorEl2] = useState(null);
   const isOpen = Boolean(anchorEl);
+  const isOpen2 = Boolean(anchorEl2);
   const handleClick = (event) => setAnchorEl(event.currentTarget);
+  const handleClick2 = (event) => setAnchorEl2(event.currentTarget);
   const handleClose = () => setAnchorEl(null);
+  const handleClose2 = (url) => {
+    if (url.cancelable) {
+      setAnchorEl2(null);
+      return;
+    }
+    dispatch(setBaseUrl(url));
+    setAnchorEl2(null);
+    window.location.reload();
+  };
 
   return (
     <AppBar
@@ -69,9 +81,34 @@ const Navbar = ({ user, isSidebarOpen, setIsSidebarOpen }) => {
               <LightModeOutlined sx={{ fontSize: "25px" }} />
             )}
           </IconButton>
-          <IconButton>
-            <SettingsOutlined sx={{ fontSize: "25px" }} />
-          </IconButton>
+
+          <FlexBetween>
+            <IconButton onClick={handleClick2}>
+              <SettingsOutlined sx={{ fontSize: "25px" }} />
+            </IconButton>
+            <Menu
+              anchorEl={anchorEl2}
+              open={isOpen2}
+              onClose={handleClose2}
+              anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+            >
+              <MenuItem onClick={() => handleClose2("http://localhost:9000/")}>
+                Local Url
+              </MenuItem>
+              <MenuItem
+                onClick={() =>
+                  handleClose2("https://xxtmw06j-3002.inc1.devtunnels.ms/")
+                }
+              >
+                Dev Url
+              </MenuItem>
+              <MenuItem
+                onClick={() => handleClose2("https://developer.pirayo.com/")}
+              >
+                Production Url
+              </MenuItem>
+            </Menu>
+          </FlexBetween>
 
           <FlexBetween>
             <Button
@@ -87,7 +124,7 @@ const Navbar = ({ user, isSidebarOpen, setIsSidebarOpen }) => {
               <Box
                 component="img"
                 alt="profile"
-                src={profileImage}
+                src={user?.data?.user?.profilePic || profileImage}
                 height="32px"
                 width="32px"
                 borderRadius="50%"
@@ -99,13 +136,13 @@ const Navbar = ({ user, isSidebarOpen, setIsSidebarOpen }) => {
                   fontSize="0.85rem"
                   sx={{ color: theme.palette.secondary[100] }}
                 >
-                  {user.name}
+                  {user?.data?.user?.fullName}
                 </Typography>
                 <Typography
                   fontSize="0.75rem"
                   sx={{ color: theme.palette.secondary[200] }}
                 >
-                  {user.occupation}
+                  {user?.data?.user?.roles.join(", ")}
                 </Typography>
               </Box>
               <ArrowDropDownOutlined

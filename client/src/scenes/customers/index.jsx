@@ -1,14 +1,29 @@
-import React from "react";
+import React, { useState } from "react";
 import { Box, useTheme } from "@mui/material";
 import { useGetCustomersQuery } from "state/api";
 import Header from "components/Header";
 import { DataGrid } from "@mui/x-data-grid";
+import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/DeleteOutlined";
+import SaveIcon from "@mui/icons-material/Save";
+import CancelIcon from "@mui/icons-material/Close";
+import { GridRowModes, GridActionsCellItem } from "@mui/x-data-grid";
+import { useDispatch } from "react-redux";
+import { setCustomerId } from "state";
+import { useNavigate } from "react-router-dom";
+import Avatar from "@mui/material/Avatar";
+import DataGridCustomToolbar from "components/DataGridCustomToolbar";
 
-const Customers = () => {
+const Customers = ({ userType, role }) => {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
   const theme = useTheme();
-  const { data, isLoading } = useGetCustomersQuery();
-  console.log("data", data);
+  const [search, setSearch] = useState("");
+  const [searchInput, setSearchInput] = useState("");
 
+  const { data, isLoading } = useGetCustomersQuery(role);
+
+  console.log(data);
   const columns = [
     {
       field: "_id",
@@ -16,7 +31,7 @@ const Customers = () => {
       flex: 1,
     },
     {
-      field: "name",
+      field: "fullName",
       headerName: "Name",
       flex: 0.5,
     },
@@ -34,25 +49,97 @@ const Customers = () => {
       },
     },
     {
-      field: "country",
-      headerName: "Country",
+      field: "profilePic",
+      headerName: "Profile Pic",
       flex: 0.4,
+      renderCell: (params) => {
+        console.log(params);
+        return (
+          <>
+            <Avatar src={params.value} />
+          </>
+        );
+      },
     },
     {
-      field: "occupation",
-      headerName: "Occupation",
-      flex: 1,
-    },
-    {
-      field: "role",
-      headerName: "Role",
+      field: "gender",
+      headerName: "Gender",
       flex: 0.5,
+    },
+    {
+      field: "actions",
+      type: "actions",
+      headerName: "Actions",
+      width: 100,
+      cellClassName: "actions",
+      getActions: ({ id }) => {
+        const isInEditMode = modifiedData[id]?.mode === GridRowModes.Edit;
+
+        if (isInEditMode) {
+          return [
+            <GridActionsCellItem
+              icon={<SaveIcon />}
+              label="Save"
+              sx={{
+                color: "primary.main",
+              }}
+              onClick={() => handleSaveClick(id)}
+            />,
+            <GridActionsCellItem
+              icon={<CancelIcon />}
+              label="Cancel"
+              className="textPrimary"
+              onClick={() => handleCancelClick(id)}
+              color="inherit"
+            />,
+          ];
+        }
+
+        return [
+          <GridActionsCellItem
+            icon={<EditIcon />}
+            label="Edit"
+            className="textPrimary"
+            onClick={() => handleEditClick(id)}
+            color="inherit"
+          />,
+          <GridActionsCellItem
+            icon={<DeleteIcon />}
+            label="Delete"
+            onClick={() => handleDeleteClick(id)}
+            color="inherit"
+          />,
+        ];
+      },
     },
   ];
 
+  const handleSaveClick = () => {
+    console.log("Save Click");
+  };
+
+  const handleEditClick = (id) => {
+    dispatch(setCustomerId(id));
+    navigate(`/single-customer/${id}`, { state: { customerId: id } });
+  };
+
+  const handleCancelClick = () => {
+    console.log("Cancel Click");
+  };
+
+  const handleDeleteClick = () => {
+    console.log("Delete Click");
+  };
+
+  let modifiedData =
+    data?.data?.users?.map((element) => ({
+      ...element,
+      _id: element.id,
+    })) || [];
+
   return (
     <Box m="1.5rem 2.5rem">
-      <Header title="CUSTOMERS" subtitle="List of Customers" />
+      <Header title={userType} subtitle={"List of " + userType} />
       <Box
         mt="40px"
         height="75vh"
@@ -84,8 +171,12 @@ const Customers = () => {
         <DataGrid
           loading={isLoading || !data}
           getRowId={(row) => row._id}
-          rows={data || []}
+          rows={modifiedData || []}
           columns={columns}
+          components={{ Toolbar: DataGridCustomToolbar }}
+          componentsProps={{
+            toolbar: { searchInput, setSearchInput, setSearch },
+          }}
         />
       </Box>
     </Box>

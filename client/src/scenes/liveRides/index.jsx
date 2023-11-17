@@ -1,27 +1,47 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Box, useTheme } from "@mui/material";
 import Header from "components/Header";
-import { ResponsiveChoropleth } from "@nivo/geo";
-import { geoData } from "state/geoData";
 import { Map, InfoWindow, Marker, GoogleApiWrapper } from "google-maps-react";
-import { useGetGeographyQuery } from 'state/api';
+import { useGetGeographyQuery, useGetLiveRidesQuery } from "state/api";
+import { Link, useNavigate } from "react-router-dom";
+import zIndex from "@mui/material/styles/zIndex";
 
 const LiveRides = (props) => {
+  const { data, isLoading } = useGetLiveRidesQuery();
 
+  const [latLng, setLatLng] = useState([]);
+  const navigate = useNavigate();
   const theme = useTheme(); // Assuming you pass the theme as a prop
-  const { data } = useGetGeographyQuery();
+
+  useEffect(() => {
+    if (data && data.data && data.data.rides.length > 0) {
+      const reformedData = data.data.rides.map((ride) => ({
+        rideId: ride.id,
+        status: ride.status,
+        rideType: ride.rideType,
+        lat: ride.driverLocation.lat,
+        lng: ride.driverLocation.lng,
+      }));
+      setLatLng(reformedData);
+      console.log("Geography data:", reformedData);
+    }
+  }, [data]);
 
   const [mapState, setMapState] = React.useState({
     showingInfoWindow: false,
     activeMarker: null,
-    selectedPlace: {},
+    selectedPlace: null,
+    rideType: null,
+    rideStatus: null,
   });
 
-  const onMarkerClick = (props, marker) => {
+  const onMarkerClick = (name, marker, rideType, rideStatus) => {
     console.log("Opening Info Window");
     setMapState({
-      selectedPlace: props,
+      selectedPlace: name,
       activeMarker: marker,
+      rideType: rideType,
+      rideStatus: rideStatus,
       showingInfoWindow: true,
     });
   };
@@ -31,18 +51,34 @@ const LiveRides = (props) => {
     setMapState({
       activeMarker: null,
       showingInfoWindow: false,
+      rideType: null,
+      rideStatus: null,
     });
   };
 
-  return (
+  const onViewDetails = (id, rideType, e) => {
+    console.log(e);
+    console.log("View Details", id, rideType);
+    if (id != null && rideType != null) {
+      navigate(`/single-ride/${id}`, {
+        state: { rideId: id, rideType: rideType },
+      });
+    }
+  };
+
+  return !isLoading ? (
     <Box m="1.5rem 2.5rem">
-      <Header title="LIVE RIDES" subtitle="Find where your rides are located." />
+      <Header
+        title="LIVE RIDES"
+        subtitle="Find where your rides are located."
+      />
       <Box
         mt="40px"
+        mb="40px"
         height="75vh"
         border={`1px solid ${theme.palette.secondary[200]}`}
         borderRadius="4px"
-        style={{ position: 'relative' }}
+        style={{ position: "relative" }}
       >
         <Map
           google={props.google}
@@ -52,23 +88,69 @@ const LiveRides = (props) => {
             lng: 67.057, // Specify the initial longitude
           }}
         >
-          <Marker
-            onClick={() => onMarkerClick("Current location", { lat: 24.958425, lng: 67.057989 })}
-            name={"Current location"}
-            position={{ lat: 24.958425, lng: 67.057989 }} // Specify marker position
-          />
+          {latLng.length > 0 &&
+            latLng.map((item, index) => (
+              <Marker
+                onClick={() =>
+                  onMarkerClick(
+                    item.rideId,
+                    `${item.lat},${item.lng}`,
+                    item.rideType,
+                    item.status
+                  )
+                }
+                key={item.rideId}
+                name={item.name}
+                position={{ lat: item.lat, lng: item.lng }} // Specify marker position
+              />
+            ))}
           <InfoWindow
             onClose={onInfoWindowClose}
             marker={mapState.activeMarker}
             visible={mapState.showingInfoWindow}
           >
             <div>
-              <h1>{mapState.selectedPlace?.name ?? 'Default'}</h1>
+              <h3>
+                {"Ride Id: "}
+                {mapState.selectedPlace != null
+                  ? mapState.selectedPlace
+                  : "Default"}
+              </h3>
+              <h5>
+                {"Co-ordinates: "}
+                {mapState.activeMarker != null
+                  ? mapState.activeMarker
+                  : "Default"}
+              </h5>
+              <h5>
+                {"Ride Type: "}
+                {mapState.rideType != null ? mapState.rideType : "Default"}
+              </h5>
+              <h5>
+                {"Ride Status: "}
+                {mapState.rideStatus != null ? mapState.rideStatus : "Default"}
+              </h5>
+              <button
+                style={{ cursor: "pointer" }}
+                onClick={(e) =>
+                  onViewDetails(mapState.selectedPlace, mapState.rideType, e)
+                }
+              >
+                View Details
+              </button>
+              {/* <Link to={`/single-ride/${mapState.selectedPlace}`}>Link</Link> */}
             </div>
           </InfoWindow>
         </Map>
       </Box>
+      <Header
+        style={{ marginBottom: "20px" }}
+        // title="Marker Info"
+        subtitle="Click the Red Marker to see info of Ride."
+      />
     </Box>
+  ) : (
+    <div>Loading...</div>
   );
 };
 

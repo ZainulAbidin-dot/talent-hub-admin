@@ -2,7 +2,9 @@ import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
   mode: "dark",
-  userId: "63701cc1f03239b7f700000e",
+  userId: "f3559f88-e228-4848-b021-c14244277273",
+  customerId: "Nameless",
+  baseUrl: "http://localhost:9000/",
 };
 
 export const globalSlice = createSlice({
@@ -12,9 +14,20 @@ export const globalSlice = createSlice({
     setMode: (state) => {
       state.mode = state.mode === "light" ? "dark" : "light";
     },
+    setBaseUrl: (state, action) => {
+      localStorage.setItem("baseUrl", action.payload);
+      console.log("state.baseUrl", state.baseUrl);
+      return {
+        ...state,
+        baseUrl: action.payload,
+      };
+    },
+    setCustomerId: (state, action) => {
+      state.customerId = action.payload;
+    }
   },
 });
 
-export const { setMode } = globalSlice.actions;
+export const { setMode, setCustomerId, setBaseUrl } = globalSlice.actions;
 
 export default globalSlice.reducer;
