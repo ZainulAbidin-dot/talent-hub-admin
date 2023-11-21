@@ -5,6 +5,7 @@ import { Map, InfoWindow, Marker, GoogleApiWrapper } from "google-maps-react";
 import { useGetGeographyQuery, useGetLiveRidesQuery } from "state/api";
 import { Link, useNavigate } from "react-router-dom";
 import zIndex from "@mui/material/styles/zIndex";
+import ReactDOM from "react-dom";
 
 const LiveRides = (props) => {
   const { data, isLoading } = useGetLiveRidesQuery();
@@ -66,6 +67,42 @@ const LiveRides = (props) => {
     }
   };
 
+  const handleInfoWindowOpen = () => {
+    const html = (
+      <div>
+        <h3>
+          {"Ride Id: "}
+          {mapState.selectedPlace != null
+            ? mapState.selectedPlace
+            : "Default"}
+        </h3>
+        <h5>
+          {"Co-ordinates: "}
+          {mapState.activeMarker != null
+            ? mapState.activeMarker
+            : "Default"}
+        </h5>
+        <h5>
+          {"Ride Type: "}
+          {mapState.rideType != null ? mapState.rideType : "Default"}
+        </h5>
+        <h5>
+          {"Ride Status: "}
+          {mapState.rideStatus != null ? mapState.rideStatus : "Default"}
+        </h5>
+        <button
+          style={{ cursor: "pointer" }}
+          onClick={(e) =>
+            onViewDetails(mapState.selectedPlace, mapState.rideType, e)
+          }
+        >
+          View Details
+        </button>
+      </div>
+    );
+    ReactDOM.render(React.Children.only(html), document.getElementById("iwd"));
+  };
+
   return !isLoading ? (
     <Box m="1.5rem 2.5rem">
       <Header
@@ -108,38 +145,10 @@ const LiveRides = (props) => {
             onClose={onInfoWindowClose}
             marker={mapState.activeMarker}
             visible={mapState.showingInfoWindow}
+            onOpen={() => handleInfoWindowOpen(mapState.rideType, mapState.rideStatus)}
           >
-            <div>
-              <h3>
-                {"Ride Id: "}
-                {mapState.selectedPlace != null
-                  ? mapState.selectedPlace
-                  : "Default"}
-              </h3>
-              <h5>
-                {"Co-ordinates: "}
-                {mapState.activeMarker != null
-                  ? mapState.activeMarker
-                  : "Default"}
-              </h5>
-              <h5>
-                {"Ride Type: "}
-                {mapState.rideType != null ? mapState.rideType : "Default"}
-              </h5>
-              <h5>
-                {"Ride Status: "}
-                {mapState.rideStatus != null ? mapState.rideStatus : "Default"}
-              </h5>
-              <button
-                style={{ cursor: "pointer" }}
-                onClick={(e) =>
-                  onViewDetails(mapState.selectedPlace, mapState.rideType, e)
-                }
-              >
-                View Details
-              </button>
-              {/* <Link to={`/single-ride/${mapState.selectedPlace}`}>Link</Link> */}
-            </div>
+            <div id="iwd" />
+
           </InfoWindow>
         </Map>
       </Box>
