@@ -13,7 +13,7 @@ import {
 } from "@mui/material";
 import TextField from "@mui/material/TextField";
 import Header from "components/Header";
-import profileImage from "assets/profile.jpeg";
+import profileImage from "assets/profile.jpg";
 import { useLocation } from "react-router-dom";
 import Dialog from "@mui/material/Dialog";
 import DialogContent from "@mui/material/DialogContent";
@@ -33,7 +33,7 @@ const SingleRide = () => {
   const [openModal, setOpenModal] = useState(false);
   const [modalImage, setModalImage] = useState("");
 
-  const [isVerified, setIsVerified] = useState([]);
+  // const [isVerified, setIsVerified] = useState([]);
 
   const rows = [
     {

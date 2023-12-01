@@ -25,6 +25,8 @@ import {
   AdminPanelSettingsOutlined,
   TrendingUpOutlined,
   PieChartOutlined,
+  DiscountOutlined,
+  TopicOutlined,
 } from "@mui/icons-material";
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -52,10 +54,6 @@ const navItems = [
     icon: <ReceiptLongOutlined />,
   },
   {
-    text: "Live-Rides",
-    icon: <PublicOutlined />,
-  },
-  {
     text: "Reviews",
     icon: <ShoppingCartOutlined />,
   },
@@ -70,6 +68,10 @@ const navItems = [
   {
     text: "Rapid-Rides",
     icon: <TrendingUpOutlined />,
+  },
+  {
+    text: "Live-Rides",
+    icon: <PublicOutlined />,
   },
   {
     text: "Sales",
@@ -90,6 +92,18 @@ const navItems = [
   {
     text: "Breakdown",
     icon: <PieChartOutlined />,
+  },
+  {
+    text: "Management",
+    icon: null,
+  },
+  {
+    text: "Discount",
+    icon: <DiscountOutlined />,
+  },
+  {
+    text: "Top-Up",
+    icon: <TopicOutlined />,
   },
 ];
 

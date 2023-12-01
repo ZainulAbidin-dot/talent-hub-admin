@@ -54,6 +54,7 @@ const SharedRides = () => {
       field: "_id",
       headerName: "ID",
       flex: 2,
+      editable: true,
     },
     {
       field: "driverName",

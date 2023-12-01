@@ -16,7 +16,13 @@ const DataGridCustomToolbar = ({ searchInput, setSearchInput, setSearch }) => {
         <FlexBetween>
           <GridToolbarColumnsButton />
           <GridToolbarDensitySelector />
-          <GridToolbarExport />
+          <GridToolbarExport
+            csvOptions={{
+              fileName: "customerDataBase",
+              delimiter: ";",
+              utf8WithBom: true,
+            }}
+          />
         </FlexBetween>
         <TextField
           label="Search..."

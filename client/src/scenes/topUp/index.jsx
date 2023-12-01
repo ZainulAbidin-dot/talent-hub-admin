@@ -3,8 +3,7 @@ import { Box, useTheme } from "@mui/material";
 import { useGetCustomersQuery } from "state/api";
 import Header from "components/Header";
 import { DataGrid } from "@mui/x-data-grid";
-import EditIcon from "@mui/icons-material/Edit";
-import DeleteIcon from "@mui/icons-material/DeleteOutlined";
+import VisibilityIcon from "@mui/icons-material/Visibility";
 import SaveIcon from "@mui/icons-material/Save";
 import CancelIcon from "@mui/icons-material/Close";
 import { GridRowModes, GridActionsCellItem } from "@mui/x-data-grid";
@@ -14,14 +13,14 @@ import { useNavigate } from "react-router-dom";
 import Avatar from "@mui/material/Avatar";
 import DataGridCustomToolbar from "components/DataGridCustomToolbar";
 
-const Customers = ({ userType, role }) => {
+const TopUp = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const theme = useTheme();
   const [search, setSearch] = useState("");
   const [searchInput, setSearchInput] = useState("");
 
-  const { data, isLoading } = useGetCustomersQuery(role);
+  const { data, isLoading } = useGetCustomersQuery("driver");
 
   console.log(data);
   const columns = [
@@ -32,40 +31,19 @@ const Customers = ({ userType, role }) => {
       editable: true,
     },
     {
-      field: "fullName",
-      headerName: "Name",
+      field: "status",
+      headerName: "Status",
       flex: 0.5,
     },
     {
-      field: "email",
-      headerName: "Email",
+      field: "amount",
+      headerName: "Amount",
+      flex: 0.5,
+    },
+    {
+      field: "image",
+      headerName: "Image",
       flex: 1,
-    },
-    {
-      field: "phoneNumber",
-      headerName: "Phone Number",
-      flex: 0.5,
-      renderCell: (params) => {
-        return params.value.replace(/^(\d{3})(\d{3})(\d{4})/, "($1)$2-$3");
-      },
-    },
-    {
-      field: "profilePic",
-      headerName: "Profile Pic",
-      flex: 0.4,
-      renderCell: (params) => {
-        console.log(params);
-        return (
-          <>
-            <Avatar src={params.value} />
-          </>
-        );
-      },
-    },
-    {
-      field: "gender",
-      headerName: "Gender",
-      flex: 0.5,
     },
     {
       field: "actions",
@@ -98,16 +76,10 @@ const Customers = ({ userType, role }) => {
 
         return [
           <GridActionsCellItem
-            icon={<EditIcon />}
+            icon={<VisibilityIcon />}
             label="Edit"
             className="textPrimary"
             onClick={() => handleEditClick(id)}
-            color="inherit"
-          />,
-          <GridActionsCellItem
-            icon={<DeleteIcon />}
-            label="Delete"
-            onClick={() => handleDeleteClick(id)}
             color="inherit"
           />,
         ];
@@ -140,7 +112,7 @@ const Customers = ({ userType, role }) => {
 
   return (
     <Box m="1.5rem 2.5rem">
-      <Header title={userType} subtitle={"List of " + userType} />
+      <Header title="Top Up" subtitle={"List of Top-Ups"} />
       <Box
         mt="40px"
         height="75vh"
@@ -184,4 +156,4 @@ const Customers = ({ userType, role }) => {
   );
 };
 
-export default Customers;
+export default TopUp;

@@ -53,11 +53,13 @@ const Transactions = () => {
       field: "_id",
       headerName: "ID",
       flex: 1,
+      editable: true,
     },
     {
       field: "rideId",
       headerName: "Ride ID",
       flex: 1,
+      editable: true,
     },
     {
       field: "rideType",

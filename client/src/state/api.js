@@ -1,13 +1,18 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import { useSelector } from 'react-redux';
 
-const SetBaseUrl = () => {
-  const baseUrl = useSelector((state) => state.global.baseUrl);
-  return (baseUrl);
-}
+const token = localStorage.getItem("token");
 
 export const api = createApi({
-  baseQuery: fetchBaseQuery({ baseUrl: localStorage.getItem("baseUrl") || <SetBaseUrl /> }),
+  baseQuery: fetchBaseQuery({
+    baseUrl: localStorage.getItem("baseUrl"),
+    prepareHeaders: (headers, { getState }) => {
+      const token = getState().global.authToken;
+      console.log("token from api", token);
+      // Add your bearer token to the headers
+      headers.set("authorization", `Bearer ${token}`);
+      return headers;
+    },
+  }),
   reducerPath: "adminApi",
   tagTypes: [
     "User",
@@ -23,6 +28,7 @@ export const api = createApi({
     "Sales",
     "Admins",
     "Performance",
+    "Discount",
     "Dashboard",
   ],
   endpoints: (build) => ({
@@ -47,6 +53,7 @@ export const api = createApi({
         return {
           url: type === "sharedExpress" ? `admin/shared-rides/${id}` : `admin/rapid-rides/${id}`,
           method: "GET",
+
         }
       },
       providesTags: ["SingleRide"],
@@ -87,6 +94,10 @@ export const api = createApi({
       query: (id) => `management/performance/${id}`,
       providesTags: ["Performance"],
     }),
+    getDiscount: build.query({
+      query: () => `admin/discount-codes`,
+      providesTags: ["Discount"],
+    }),
     getDashboard: build.query({
       query: () => "general/dashboard",
       providesTags: ["Dashboard"],
@@ -108,5 +119,6 @@ export const {
   useGetSalesQuery,
   useGetAdminsQuery,
   useGetUserPerformanceQuery,
+  useGetDiscountQuery,
   useGetDashboardQuery,
 } = api;

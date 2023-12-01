@@ -9,8 +9,8 @@ import {
 } from "@mui/icons-material";
 import FlexBetween from "components/FlexBetween";
 import { useDispatch } from "react-redux";
-import { setBaseUrl, setMode } from "state";
-import profileImage from "assets/profile.jpeg";
+import { setAuthToken, setBaseUrl, setMode } from "state";
+import profileImage from "assets/profile.jpg";
 import {
   AppBar,
   Button,
@@ -23,10 +23,12 @@ import {
   MenuItem,
   useTheme,
 } from "@mui/material";
+import { useNavigate } from "react-router-dom";
 
 const Navbar = ({ user, isSidebarOpen, setIsSidebarOpen }) => {
   const dispatch = useDispatch();
   const theme = useTheme();
+  const navigate = useNavigate();
 
   const [anchorEl, setAnchorEl] = useState(null);
   const [anchorEl2, setAnchorEl2] = useState(null);
@@ -34,7 +36,15 @@ const Navbar = ({ user, isSidebarOpen, setIsSidebarOpen }) => {
   const isOpen2 = Boolean(anchorEl2);
   const handleClick = (event) => setAnchorEl(event.currentTarget);
   const handleClick2 = (event) => setAnchorEl2(event.currentTarget);
-  const handleClose = () => setAnchorEl(null);
+  const handleClose = (type) => {
+    if (type === "close") {
+      setAnchorEl(null);
+      return;
+    }
+    setAnchorEl(null);
+    dispatch(setAuthToken(null));
+    navigate("/login");
+  };
   const handleClose2 = (url) => {
     if (url.cancelable) {
       setAnchorEl2(null);
@@ -152,10 +162,10 @@ const Navbar = ({ user, isSidebarOpen, setIsSidebarOpen }) => {
             <Menu
               anchorEl={anchorEl}
               open={isOpen}
-              onClose={handleClose}
+              onClose={() => handleClose("close")}
               anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
             >
-              <MenuItem onClick={handleClose}>Log Out</MenuItem>
+              <MenuItem onClick={() => handleClose("logout")}>Log Out</MenuItem>
             </Menu>
           </FlexBetween>
         </FlexBetween>

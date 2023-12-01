@@ -5,6 +5,8 @@ const initialState = {
   userId: "f3559f88-e228-4848-b021-c14244277273",
   customerId: "Nameless",
   baseUrl: "http://localhost:9000/",
+  pathName: "login",
+  authToken: null,
 };
 
 export const globalSlice = createSlice({
@@ -24,10 +26,20 @@ export const globalSlice = createSlice({
     },
     setCustomerId: (state, action) => {
       state.customerId = action.payload;
+    },
+    setPathName: (state, action) => {
+      state.pathName = action.payload;
+    },
+    setUserId: (state, action) => {
+      state.userId = action.payload;
+    },
+    setAuthToken: (state, action) => {
+      console.log("setAuthToken", action.payload);
+      state.authToken = action.payload;
     }
   },
 });
 
-export const { setMode, setCustomerId, setBaseUrl } = globalSlice.actions;
+export const { setMode, setCustomerId, setPathName, setBaseUrl, setUserId, setAuthToken } = globalSlice.actions;
 
 export default globalSlice.reducer;
