@@ -79,6 +79,10 @@ export default function Login() {
           dispatch(setUserId(res.data.data.user.id));
           dispatch(setAuthToken(res.data.data.token));
           localStorage.setItem("token", res.data.data.token);
+          localStorage.setItem(
+            "baseUrl",
+            "https://xxtmw06j-3002.inc1.devtunnels.ms/"
+          );
           dispatch(setPathName("dashboard"));
           navigate("/dashboard");
         }
