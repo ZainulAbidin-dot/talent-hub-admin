@@ -4,7 +4,15 @@ import { Box, Typography, useTheme } from "@mui/material";
 import { useGetSalesQuery } from "state/api";
 
 const BreakdownChart = ({ isDashboard = false }) => {
-  const { data, isLoading } = useGetSalesQuery();
+  const data = {
+    totalSales: 7000,
+    salesByCategory: {
+      "Shared Express": 4000,
+      "Rapid Express": 3000,
+    },
+  };
+  const isLoading = false;
+  // const { data, isLoading } = useGetSalesQuery();
   const theme = useTheme();
 
   if (!data || isLoading) return "Loading...";
@@ -12,7 +20,7 @@ const BreakdownChart = ({ isDashboard = false }) => {
   const colors = [
     theme.palette.secondary[500],
     theme.palette.secondary[300],
-    theme.palette.secondary[300],
+    theme.palette.secondary[500],
     theme.palette.secondary[500],
   ];
   const formattedData = Object.entries(data.salesByCategory).map(
@@ -97,7 +105,7 @@ const BreakdownChart = ({ isDashboard = false }) => {
             justify: false,
             translateX: isDashboard ? 20 : 0,
             translateY: isDashboard ? 50 : 56,
-            itemsSpacing: 0,
+            itemsSpacing: 30,
             itemWidth: 85,
             itemHeight: 18,
             itemTextColor: "#999",
@@ -130,7 +138,7 @@ const BreakdownChart = ({ isDashboard = false }) => {
         }}
       >
         <Typography variant="h6">
-          {!isDashboard && "Total:"} ${data.yearlySalesTotal}
+          {!isDashboard && "Total:"} Rs.{data.totalSales}
         </Typography>
       </Box>
     </Box>

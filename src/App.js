@@ -21,6 +21,7 @@ import SingleRide from 'scenes/singleRide';
 import Discount from 'scenes/discount';
 import Login from 'scenes/login';
 import TopUp from 'scenes/topUp';
+import SingleTopUp from 'scenes/singleTopUp';
 import { setAuthToken } from 'state';
 
 function App() {
@@ -38,6 +39,7 @@ function App() {
               </Route>
               <Route element={<ProtectedRoute />}>
                 <Route element={<Layout />}>
+                  <Route index element={<Dashboard />} />
                   <Route path="/dashboard" element={<Dashboard />} />
                   <Route path="/reviews" element={<Reviews />} />
                   <Route path="/drivers" element={<Customers userType={"Drivers"} role={"driver"} />} />
@@ -54,6 +56,7 @@ function App() {
                   <Route path="/breakdown" element={<Breakdown />} />
                   <Route path="/discount" element={<Discount />} />
                   <Route path="/top-up" element={<TopUp />} />
+                  <Route path="/single-top-up/:id" element={<SingleTopUp />} />
                 </Route>
               </Route>
             </Route>

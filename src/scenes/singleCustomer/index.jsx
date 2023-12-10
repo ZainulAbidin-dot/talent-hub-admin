@@ -1,5 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { useGetSingleCustomerQuery } from "state/api";
+import {
+  useGetAllDocumentsByUserIdQuery,
+  useGetSingleCustomerQuery,
+} from "state/api";
 import {
   Box,
   useTheme,
@@ -8,113 +11,101 @@ import {
   CardContent,
   Typography,
   CardMedia,
-  FormControlLabel,
-  Switch,
+  MenuItem,
+  Stack,
 } from "@mui/material";
 import TextField from "@mui/material/TextField";
 import Header from "components/Header";
 import profileImage from "assets/profile.jpg";
-import { useLocation } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import Dialog from "@mui/material/Dialog";
 import DialogContent from "@mui/material/DialogContent";
 import DialogTitle from "@mui/material/DialogTitle";
 import { DataGrid } from "@mui/x-data-grid";
+import axios from "axios";
+import { useSelector } from "react-redux";
 
 const SingleCustomer = () => {
   const theme = useTheme();
-  const { state } = useLocation();
-  const { data, isLoading } = useGetSingleCustomerQuery(state.customerId);
-
+  const { id } = useParams();
+  const { data, isLoading } = useGetSingleCustomerQuery(id);
   const [formData, setFormData] = useState(null);
   const [hovered, setHovered] = useState(false);
   const [openModal, setOpenModal] = useState(false);
   const [modalImage, setModalImage] = useState("");
+  const [driverProfileStatus, setDriverProfileStatus] = useState(false);
+  const [updatedDriverProfileStatus, setUpdatedDriverProfileStatus] =
+    useState(null);
+  const [passengerProfileStatus, setPassengerProfileStatus] = useState(false);
+  const [updatedPassengerProfileStatus, setUpdatedPassengerProfileStatus] =
+    useState(null);
 
-  const [isVerified, setIsVerified] = useState([
+  const statusType = [
     {
-      id: 1,
-      name: "Profile Picture",
-      image: formData != null ? formData.profilePic : profileImage,
-      isCorrect: false,
-      remarks: "",
+      value: "underReview",
+      label: "Under Review",
     },
     {
-      id: 2,
-      name: "CNIC Front Picture",
-      image:
-        formData != null && formData.driverProfile
-          ? formData.driverProfile.cnicFrontPic
-          : profileImage,
-      isCorrect: false,
-      remarks: "",
+      value: "active",
+      label: "Active",
     },
     {
-      id: 3,
-      name: "CNIC Back Picture",
-      image:
-        formData != null && formData.driverProfile
-          ? formData.driverProfile.cnicBackPic
-          : profileImage,
-      isCorrect: false,
-      remarks: "",
-    },
-    {
-      id: 4,
-      name: "License Plate Number",
-      image:
-        formData != null && formData.driverProfile
-          ? formData.driverProfile.licensePic
-          : profileImage,
-      isCorrect: false,
-      remarks: "",
-    },
-    {
-      id: 5,
-      name: "Assign Admin Role",
-      image: formData != null ? formData.profilePic : profileImage,
-      isCorrect: false,
-      remarks: "",
-    },
-  ]);
-
-  const rows = [
-    {
-      id: 1,
-      name: "Profile Picture",
-      image: formData != null ? formData.profilePic : profileImage,
-    },
-    {
-      id: 2,
-      name: "CNIC Front Picture",
-      image:
-        formData != null && formData.driverProfile
-          ? formData.driverProfile.cnicFrontPic
-          : profileImage,
-    },
-    {
-      id: 3,
-      name: "CNIC Back Picture",
-      image:
-        formData != null && formData.driverProfile
-          ? formData.driverProfile.cnicBackPic
-          : profileImage,
-    },
-    {
-      id: 4,
-      name: "License Plate Number",
-      image:
-        formData != null && formData.driverProfile
-          ? formData.driverProfile.licensePic
-          : profileImage,
-    },
-    {
-      id: 5,
-      name: "Assign Admin Role",
-      image: formData != null ? formData.profilePic : profileImage,
+      value: "suspended",
+      label: "Suspended",
     },
   ];
 
+  const {
+    data: documents,
+    isLoading: isDocumentsLoading,
+    isError: isDocumentsError,
+    error: documentsError,
+  } = useGetAllDocumentsByUserIdQuery(id);
+
+  if (isDocumentsLoading === false && isDocumentsError === true) {
+    console.log("documentsError", documentsError);
+  }
+
+  let formattedDocs = [];
+
+  if (isDocumentsLoading === false && isDocumentsError === false) {
+    const profileDocuments = documents.data.documents.map((item) => {
+      return {
+        id: item.id,
+        name: item.name,
+        isCorrect: item.status,
+        image: item.url,
+        remarks: item.status === "approved" ? "No Remarks" : item.remarks,
+      };
+    });
+
+    let vehicleDocuments = [];
+    documents.data.vehicles.forEach((item) => {
+      item.documents.forEach((doc) => {
+        vehicleDocuments = [
+          ...vehicleDocuments,
+          {
+            id: doc.id,
+            name: doc.name,
+            isCorrect: doc.status,
+            image: doc.url,
+            remarks: doc.status === "approved" ? "No Remarks" : doc.remarks,
+          },
+        ];
+      });
+    });
+
+    formattedDocs = [...profileDocuments, ...vehicleDocuments];
+  }
+
+  // console.log(formattedDocs);
+  const rows = formattedDocs || [];
+
+  console.log("formattedDocs", formattedDocs);
+  const [isVerified, setIsVerified] = useState(rows);
+
   const [toggleBtn, setToggleBtn] = useState(Array(rows.length).fill(false));
+  const accessToken = useSelector((state) => state.global.authToken);
 
   const columns = [
     {
@@ -125,7 +116,7 @@ const SingleCustomer = () => {
     {
       field: "picture",
       headerName: "Picture",
-      width: 150,
+      width: 250,
       renderCell: (params) => (
         <Card>
           <CardMedia
@@ -150,18 +141,19 @@ const SingleCustomer = () => {
       ),
     },
     {
-      field: "toggleSwitch",
-      headerName: "Is Verified",
-      width: 150,
+      field: "status",
+      headerName: "Status",
+      width: 250,
       renderCell: (params) => (
-        <FormControlLabel
-          control={
-            <Switch
-              checked={toggleBtn[params.id - 1]}
-              onChange={() => handleToggleSwitch(params)}
-              color="warning"
-            />
-          }
+        <TextField
+          id={`inputField-${params.id}`}
+          label={params.row.isCorrect}
+          variant="outlined"
+          size="small"
+          fullWidth
+          required
+          // You can handle the input change with onChange prop
+          onChange={(e) => handleSelect(params, e.target.value)}
         />
       ),
     },
@@ -172,10 +164,11 @@ const SingleCustomer = () => {
       renderCell: (params) => (
         <TextField
           id={`inputField-${params.id}`}
-          label={params.row.name + " Remark"}
+          label={params.row.remarks + " Remark"}
           variant="outlined"
           size="small"
           fullWidth
+          required
           // You can handle the input change with onChange prop
           onChange={(e) => handleRemarks(params, e.target.value)}
         />
@@ -186,45 +179,27 @@ const SingleCustomer = () => {
   useEffect(() => {
     if (!isLoading && data != null && data !== undefined) {
       setFormData({
-        name: data.data.user.fullName,
-        email: data.data.user.email,
-        phoneNumber: data.data.user.phoneNumber,
-        role: data.data.user.roles.join(", "),
-        profilePic: data.data.user.profilePic,
-        gender: data.data.user.gender === "F" ? "Female" : "Male",
-        wallet: data.data.user.wallet.balance + " Rupees",
-        paymentMethods: data.data.user.paymentMethods.join(", "),
-        driverProfile: data.data.user.driverProfile,
-        passengerProfile: data.data.user.passengerProfile,
+        name: data.data.user.data.fullName,
+        email: data.data.user.data.email,
+        phoneNumber: data.data.user.data.phoneNumber,
+        role: data.data.user.data.roles.join(", "),
+        profilePic: data.data.user.data.profilePic,
+        gender: data.data.user.data.gender === "F" ? "Female" : "Male",
+        driverProfile: data.data.user.data.driverProfile,
+        passengerProfile: data.data.user.data.passengerProfile,
+        cnicNumber: data.data.user.data.cnicNumber,
       });
-
-      console.log(data);
-      if (data?.data?.user?.driverProfile?.vehicles.length > 0) {
-        data?.data?.user?.driverProfile?.vehicles?.forEach((vehicle, index) => {
-          rows.push({
-            id: index + 6,
-            name: "Vehicle " + (index + 1) + " Registration Picture",
-            image: vehicle.vehicleRegistrationPic,
-          });
-        });
-      }
     }
   }, [isLoading, data]);
 
-  const handleToggleSwitch = (params, value = 0) => {
-    setToggleBtn((prevToggleBtns) => {
-      const newToggleBtns = [...prevToggleBtns];
-      newToggleBtns[params.id - 1] = !newToggleBtns[params.id - 1];
-      return newToggleBtns;
-    });
-
+  const handleSelect = (params, value) => {
     setIsVerified((prevIsVerified) => {
       return prevIsVerified.map((item) => {
         if (item.id === params.id) {
           return {
             id: item.id,
             name: item.name,
-            isCorrect: value === 0 ? true : false,
+            isCorrect: value,
             image: item.image,
             remarks: item.remarks,
           };
@@ -255,9 +230,93 @@ const SingleCustomer = () => {
     setOpenModal(false);
   };
 
-  const handleSubmit = () => {
-    // Handle form submission here, e.g., update data in the backend
-    console.log("Form submitted with data:", isVerified);
+  const handleSubmit = async () => {
+    // Update data in the backend
+
+    console.log(isVerified);
+    try {
+      outerLoop: for (const item of isVerified) {
+        console.log(item);
+        if (
+          (!item.isCorrect !== "approved" && item.remarks === "") ||
+          (!item.isCorrect !== "approved" &&
+            item.remarks === "Document is not uploaded yet.")
+        ) {
+          alert("Please add remarks when you reject a document.");
+          break outerLoop;
+        } else {
+          const response = await axios.patch(
+            "https://xxtmw06j-3002.inc1.devtunnels.ms/admin/documents/status",
+            {
+              documentId: item.id,
+              status: item.isCorrect,
+              remarks: item.isCorrect === "approved" ? "" : item.remarks,
+            },
+            {
+              headers: {
+                Authorization: `Bearer ${accessToken}`,
+                "Content-Type": "application/json",
+              },
+            }
+          );
+
+          console.log(response);
+        }
+      }
+    } catch (error) {
+      console.log(error);
+    }
+
+    window.location.reload();
+  };
+
+  const handleUpdatedStatusSubmit = async (e) => {
+    e.preventDefault();
+    console.log(updatedDriverProfileStatus, updatedPassengerProfileStatus);
+
+    if (updatedDriverProfileStatus != null) {
+      try {
+        const response = await axios.patch(
+          "https://xxtmw06j-3002.inc1.devtunnels.ms/admin/driver-profiles/status",
+          {
+            driverProfileId: formData.driverProfile.id,
+            status: updatedDriverProfileStatus,
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
+        console.log(response);
+      } catch (error) {
+        console.log(error);
+      }
+    }
+
+    if (updatedPassengerProfileStatus != null) {
+      try {
+        const response = await axios.patch(
+          "https://xxtmw06j-3002.inc1.devtunnels.ms/admin/passenger-profiles/status",
+          {
+            passengerProfileId: formData.passengerProfile.id,
+            status: updatedPassengerProfileStatus,
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
+        console.log(response);
+      } catch (error) {
+        console.log(error);
+      }
+    }
+
+    // window.location.reload();
   };
 
   return (
@@ -371,7 +430,7 @@ const SingleCustomer = () => {
                       NAME : {formData.name}
                     </Typography>
                     <Typography variant="body2" color="text.secondary">
-                      PHONE NUMBER : {formData.phoneNumber}
+                      CNIC : {formData.cnicNumber}
                     </Typography>
                     <Typography variant="body2" color="text.secondary">
                       EMAIL : {formData.email}
@@ -381,9 +440,6 @@ const SingleCustomer = () => {
                     </Typography>
                     <Typography variant="body2" color="text.secondary">
                       GENDER : {formData.gender}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      WALLET BALANCE : {formData.wallet}
                     </Typography>
 
                     {formData.passengerProfile ? (
@@ -397,8 +453,76 @@ const SingleCustomer = () => {
                           Passenger Profile Details
                         </Typography>
                         <Typography variant="body2" color="text.secondary">
-                          User Id: {formData.passengerProfile.userId}
+                          User Id: {formData.passengerProfile.id}
                         </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          Is Verified: {formData.passengerProfile.status}
+                        </Typography>
+
+                        <Button
+                          variant="outlined"
+                          color="secondary"
+                          type="submit"
+                          sx={{ mt: "1rem" }}
+                          onClick={() =>
+                            setPassengerProfileStatus((prev) =>
+                              prev === false ? true : false
+                            )
+                          }
+                        >
+                          Update Status
+                        </Button>
+
+                        {passengerProfileStatus === true && (
+                          <Box>
+                            <React.Fragment>
+                              <h2>Update Status</h2>
+                              <form
+                                onSubmit={(e) => handleUpdatedStatusSubmit(e)}
+                              >
+                                <Stack
+                                  spacing={2}
+                                  direction="row"
+                                  sx={{ marginBottom: 4 }}
+                                >
+                                  <TextField
+                                    id="outlined-select-currency"
+                                    select
+                                    label="Type"
+                                    defaultValue={
+                                      formData.passengerProfile.status
+                                    }
+                                    sx={{ mb: 4, mr: 2 }}
+                                    onChange={(e) =>
+                                      setUpdatedPassengerProfileStatus(
+                                        e.target.value
+                                      )
+                                    }
+                                  >
+                                    {statusType.map((option) => (
+                                      <MenuItem
+                                        key={option.value}
+                                        value={option.value}
+                                      >
+                                        {option.label}
+                                      </MenuItem>
+                                    ))}
+                                  </TextField>
+                                </Stack>
+                                <Button
+                                  variant="outlined"
+                                  color="secondary"
+                                  type="submit"
+                                >
+                                  Submit
+                                </Button>
+                              </form>
+                              <small>
+                                {/* Already have an account? <Link to="/login">Login Here</Link> */}
+                              </small>
+                            </React.Fragment>
+                          </Box>
+                        )}
                       </>
                     ) : null}
 
@@ -413,15 +537,75 @@ const SingleCustomer = () => {
                           Driver Profile Details
                         </Typography>
                         <Typography variant="body2" color="text.secondary">
-                          User Id : {formData.driverProfile.userId}
+                          User Id : {formData.driverProfile.id}
                         </Typography>
                         <Typography variant="body2" color="text.secondary">
-                          CNIC : {formData.driverProfile.cnicNumber}
+                          Is Verified : {formData.driverProfile.status}
                         </Typography>
-                        <Typography variant="body2" color="text.secondary">
-                          Is Verified :{" "}
-                          {formData.driverProfile.isVerified ? "True" : "False"}
-                        </Typography>
+
+                        <Button
+                          variant="outlined"
+                          color="secondary"
+                          type="submit"
+                          sx={{ mt: "1rem" }}
+                          onClick={() =>
+                            setDriverProfileStatus((prev) =>
+                              prev === false ? true : false
+                            )
+                          }
+                        >
+                          Update Status
+                        </Button>
+
+                        {driverProfileStatus === true && (
+                          <Box>
+                            <React.Fragment>
+                              <h2>Update Status</h2>
+                              <form
+                                onSubmit={(e) => handleUpdatedStatusSubmit(e)}
+                              >
+                                <Stack
+                                  spacing={2}
+                                  direction="row"
+                                  sx={{ marginBottom: 4 }}
+                                >
+                                  <TextField
+                                    id="outlined-select-currency"
+                                    select
+                                    label="Type"
+                                    defaultValue={formData.driverProfile.status}
+                                    sx={{ mb: 4, mr: 2 }}
+                                    onChange={(e) =>
+                                      setUpdatedDriverProfileStatus(
+                                        e.target.value
+                                      )
+                                    }
+                                  >
+                                    {statusType.map((option) => (
+                                      <MenuItem
+                                        key={option.value}
+                                        value={option.value}
+                                      >
+                                        {option.label}
+                                      </MenuItem>
+                                    ))}
+                                  </TextField>
+                                </Stack>
+                                <Button
+                                  variant="outlined"
+                                  color="secondary"
+                                  type="submit"
+                                >
+                                  Submit
+                                </Button>
+                              </form>
+                              <small>
+                                {/* Already have an account? <Link to="/login">Login Here</Link> */}
+                              </small>
+                            </React.Fragment>
+                          </Box>
+                        )}
+
                         <Typography
                           gutterBottom
                           variant="h3"
@@ -447,16 +631,6 @@ const SingleCustomer = () => {
                                     margin: "0 auto",
                                   }}
                                 >
-                                  <Typography
-                                    gutterBottom
-                                    variant="h6"
-                                    component="div"
-                                  >
-                                    Category :{" "}
-                                    {vehicle.categories.map(
-                                      (category) => category.name + " "
-                                    )}
-                                  </Typography>
                                   <Typography
                                     gutterBottom
                                     variant="h6"

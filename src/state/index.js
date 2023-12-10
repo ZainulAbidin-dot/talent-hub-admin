@@ -2,9 +2,9 @@ import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
   mode: "dark",
-  userId: "f3559f88-e228-4848-b021-c14244277273",
+  userId: "76d29862-606d-40ef-b633-493fae0356f2",
   customerId: "Nameless",
-  baseUrl: "http://localhost:9000/",
+  baseUrl: "https://xxtmw06j-3002.inc1.devtunnels.ms",
   pathName: "login",
   authToken: null,
 };

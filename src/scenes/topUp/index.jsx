@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Box, useTheme } from "@mui/material";
-import { useGetCustomersQuery } from "state/api";
+import { useGetTopUpQuery } from "state/api";
 import Header from "components/Header";
 import { DataGrid } from "@mui/x-data-grid";
 import VisibilityIcon from "@mui/icons-material/Visibility";
@@ -20,7 +20,7 @@ const TopUp = () => {
   const [search, setSearch] = useState("");
   const [searchInput, setSearchInput] = useState("");
 
-  const { data, isLoading } = useGetCustomersQuery("driver");
+  const { data, isLoading } = useGetTopUpQuery();
 
   console.log(data);
   const columns = [
@@ -41,8 +41,8 @@ const TopUp = () => {
       flex: 0.5,
     },
     {
-      field: "image",
-      headerName: "Image",
+      field: "remarks",
+      headerName: "Image Remarks",
       flex: 1,
     },
     {
@@ -92,8 +92,8 @@ const TopUp = () => {
   };
 
   const handleEditClick = (id) => {
-    dispatch(setCustomerId(id));
-    navigate(`/single-customer/${id}`, { state: { customerId: id } });
+    console.log("Edit Click", id);
+    navigate(`/single-top-up/${id}`, { state: { topUpId: id } });
   };
 
   const handleCancelClick = () => {
@@ -105,8 +105,10 @@ const TopUp = () => {
   };
 
   let modifiedData =
-    data?.data?.users?.map((element) => ({
+    data?.data?.topups?.map((element) => ({
       ...element,
+      remarks: element?.image?.remarks,
+      amount: element.amount == null ? "N/A" : `Rs. ${element.amount}`,
       _id: element.id,
     })) || [];
 

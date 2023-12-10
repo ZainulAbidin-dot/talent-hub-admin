@@ -73,10 +73,10 @@ const navItems = [
     text: "Live-Rides",
     icon: <PublicOutlined />,
   },
-  // {
-  //   text: "Sales",
-  //   icon: null,
-  // },
+  {
+    text: "Sales",
+    icon: null,
+  },
   // {
   //   text: "Overview",
   //   icon: <PointOfSaleOutlined />,
@@ -89,10 +89,10 @@ const navItems = [
   //   text: "Monthly",
   //   icon: <CalendarMonthOutlined />,
   // },
-  // {
-  //   text: "Breakdown",
-  //   icon: <PieChartOutlined />,
-  // },
+  {
+    text: "Breakdown",
+    icon: <PieChartOutlined />,
+  },
   {
     text: "Management",
     icon: null,

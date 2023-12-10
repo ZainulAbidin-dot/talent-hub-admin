@@ -43,6 +43,7 @@ const Navbar = ({ user, isSidebarOpen, setIsSidebarOpen }) => {
     }
     setAnchorEl(null);
     dispatch(setAuthToken(null));
+    localStorage.removeItem("token");
     navigate("/login");
   };
   const handleClose2 = (url) => {
@@ -102,7 +103,7 @@ const Navbar = ({ user, isSidebarOpen, setIsSidebarOpen }) => {
               onClose={handleClose2}
               anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
             >
-              <MenuItem onClick={() => handleClose2("http://localhost:9000/")}>
+              <MenuItem onClick={() => handleClose2("http://localhost:3002/")}>
                 Local Url
               </MenuItem>
               <MenuItem
@@ -152,7 +153,7 @@ const Navbar = ({ user, isSidebarOpen, setIsSidebarOpen }) => {
                   fontSize="0.75rem"
                   sx={{ color: theme.palette.secondary[200] }}
                 >
-                  {user?.data?.user?.roles.join(", ")}
+                  {user?.data?.user?.data.roles.join(", ")}
                 </Typography>
               </Box>
               <ArrowDropDownOutlined
