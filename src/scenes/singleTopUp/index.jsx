@@ -81,12 +81,16 @@ const SingleTopUp = () => {
     };
     console.log(data, state.topUpId, accessToken);
     await axios
-      .put(`http://127.0.0.1:3002/admin/topups/${state.topUpId}`, data, {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          "Content-Type": "application/json",
-        },
-      })
+      .put(
+        `https://xxtmw06j-3002.inc1.devtunnels.ms/admin/topups/${state.topUpId}`,
+        data,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            "Content-Type": "application/json",
+          },
+        }
+      )
       .then((res) => {
         console.log(res);
         console.log(res.data);
