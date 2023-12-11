@@ -230,7 +230,8 @@ const SingleCustomer = () => {
     setOpenModal(false);
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (e) => {
+    e.preventDefault();
     // Update data in the backend
 
     console.log(isVerified);
@@ -752,7 +753,7 @@ const SingleCustomer = () => {
                     marginRight: "auto",
                   }}
                   color="primary"
-                  onClick={handleSubmit}
+                  onClick={(e) => handleSubmit(e)}
                 >
                   Save
                 </Button>
