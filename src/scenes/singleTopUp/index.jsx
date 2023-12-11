@@ -32,10 +32,10 @@ const SingleTopUp = () => {
   const [topUpData, setTopUpData] = useState({
     amount: 0,
     status: "pending",
-    remarks: "",
+    remarks: null,
   });
 
-  const accessToken = useSelector((state) => state.global.authToken);
+  const accessToken = localStorage.getItem("token");
 
   const topUpStatusType = [
     {
@@ -77,8 +77,12 @@ const SingleTopUp = () => {
     const data = {
       amount: Number(topUpData.amount),
       status: topUpData.status,
-      remarks: topUpData.remarks,
     };
+
+    if (topUpData.remarks != null) {
+      data.remarks = topUpData.remarks;
+    }
+
     console.log(data, state.topUpId, accessToken);
     await axios
       .put(
@@ -93,10 +97,10 @@ const SingleTopUp = () => {
       )
       .then((res) => {
         console.log(res);
-        console.log(res.data);
+        console.log("Response", res.data);
       })
       .catch((err) => {
-        console.log(err);
+        console.log("Error", err);
       });
 
     window.location.reload();
