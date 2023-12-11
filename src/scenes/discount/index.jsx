@@ -63,7 +63,13 @@ const Discount = () => {
     await axios
       .post(
         `https://xxtmw06j-3002.inc1.devtunnels.ms/admin/discount-codes`,
-        data
+        data,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+            "Content-Type": "application/json",
+          },
+        }
       )
       .then((res) => {
         console.log(res);
