@@ -61,16 +61,12 @@ const Discount = () => {
       endDate: discountData.endDate,
     };
     await axios
-      .post(
-        `https://xxtmw06j-3002.inc1.devtunnels.ms/admin/discount-codes`,
-        data,
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-            "Content-Type": "application/json",
-          },
-        }
-      )
+      .post(`${localStorage.getItem("baseUrl")}admin/discount-codes`, data, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+          "Content-Type": "application/json",
+        },
+      })
       .then((res) => {
         console.log(res);
         console.log(res.data);
@@ -99,7 +95,7 @@ const Discount = () => {
     console.log(params.row);
     axios
       .delete(
-        `https://xxtmw06j-3002.inc1.devtunnels.ms/admin/discount-codes/` +
+        `${localStorage.getItem("baseUrl")}admin/discount-codes/` +
           params.row._id
       )
       .then((res) => {

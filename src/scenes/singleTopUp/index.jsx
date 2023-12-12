@@ -17,7 +17,6 @@ import DialogTitle from "@mui/material/DialogTitle";
 import { TextField, Button, Stack } from "@mui/material";
 import axios from "axios";
 import MenuItem from "@mui/material/MenuItem";
-import { useSelector } from "react-redux";
 
 const SingleTopUp = () => {
   const theme = useTheme();
@@ -83,10 +82,9 @@ const SingleTopUp = () => {
       data.remarks = topUpData.remarks;
     }
 
-    console.log(data, state.topUpId, accessToken);
     await axios
       .put(
-        `https://xxtmw06j-3002.inc1.devtunnels.ms/admin/topups/${state.topUpId}`,
+        `${localStorage.getItem("baseUrl")}admin/topups/${state.topUpId}`,
         data,
         {
           headers: {

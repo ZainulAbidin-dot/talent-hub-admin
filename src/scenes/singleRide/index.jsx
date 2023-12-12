@@ -167,7 +167,6 @@ const SingleRide = () => {
         })
       );
     }
-    console.log(data);
   }, [isLoading, data]);
 
   const handleToggleSwitch = (params, value = 0) => {
@@ -176,7 +175,6 @@ const SingleRide = () => {
       newToggleBtns[params.id - 1] = !newToggleBtns[params.id - 1];
       return newToggleBtns;
     });
-    console.log(params, value, toggleBtn);
   };
 
   const handleCloseModal = () => {

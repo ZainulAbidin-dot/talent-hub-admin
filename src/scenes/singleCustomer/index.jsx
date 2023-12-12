@@ -13,6 +13,7 @@ import {
   CardMedia,
   MenuItem,
   Stack,
+  Menu,
 } from "@mui/material";
 import TextField from "@mui/material/TextField";
 import Header from "components/Header";
@@ -98,7 +99,6 @@ const SingleCustomer = () => {
     formattedDocs = [...profileDocuments, ...vehicleDocuments];
   }
 
-  // console.log(formattedDocs);
   const rows = formattedDocs || [];
 
   console.log("formattedDocs", formattedDocs);
@@ -107,6 +107,14 @@ const SingleCustomer = () => {
   const [toggleBtn, setToggleBtn] = useState(Array(rows.length).fill(false));
   const accessToken = useSelector((state) => state.global.authToken);
 
+  const [anchorEl, setAnchorEl] = React.useState(null);
+  const open = Boolean(anchorEl);
+  const handleClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
   const columns = [
     {
       field: "name",
@@ -145,16 +153,40 @@ const SingleCustomer = () => {
       headerName: "Status",
       width: 250,
       renderCell: (params) => (
-        <TextField
-          id={`inputField-${params.id}`}
-          label={params.row.isCorrect}
-          variant="outlined"
-          size="small"
-          fullWidth
-          required
-          // You can handle the input change with onChange prop
-          onChange={(e) => handleSelect(params, e.target.value)}
-        />
+        <>
+          <TextField
+            id={`inputField-${params.id}`}
+            label={params.row.isCorrect}
+            variant="outlined"
+            size="small"
+            fullWidth
+            required
+            // You can handle the input change with onChange prop
+            onChange={(e) => handleSelect(params, e.target.value)}
+          />
+          <select name="status" id={`inputField-${params.id}`}>
+            <option value="approved">Approve</option>
+            <option value="suspended">Reject</option>
+            <option value="underReview">Pending</option>
+          </select>
+        </>
+
+        // <Menu
+        //   id={`menu-${params.id}`}
+        //   anchorEl={anchorEl}
+        //   open={open && anchorEl === `button-${params.id}`}
+        //   onClose={handleClose}
+        //   MenuListProps={{
+        //     "aria-labelledby": `button-${params.id}`,
+        //   }}
+        // >
+        //   <MenuItem onClick={() => handleSelect(params, "approved")}>
+        //     Approve
+        //   </MenuItem>
+        //   <MenuItem onClick={() => handleSelect(params, "rejected")}>
+        //     Reject
+        //   </MenuItem>
+        // </Menu>
       ),
     },
     {
@@ -193,6 +225,7 @@ const SingleCustomer = () => {
   }, [isLoading, data]);
 
   const handleSelect = (params, value) => {
+    console.log(params, value);
     setIsVerified((prevIsVerified) => {
       return prevIsVerified.map((item) => {
         if (item.id === params.id) {
@@ -247,7 +280,7 @@ const SingleCustomer = () => {
           break outerLoop;
         } else {
           const response = await axios.patch(
-            "https://xxtmw06j-3002.inc1.devtunnels.ms/admin/documents/status",
+            `${localStorage.getItem("baseUrl")}admin/documents/status`,
             {
               documentId: item.id,
               status: item.isCorrect,
@@ -278,7 +311,7 @@ const SingleCustomer = () => {
     if (updatedDriverProfileStatus != null) {
       try {
         const response = await axios.patch(
-          "https://xxtmw06j-3002.inc1.devtunnels.ms/admin/driver-profiles/status",
+          `${localStorage.getItem("baseUrl")}admin/driver-profiles/status`,
           {
             driverProfileId: formData.driverProfile.id,
             status: updatedDriverProfileStatus,
@@ -291,15 +324,17 @@ const SingleCustomer = () => {
           }
         );
         console.log(response);
+        alert(response.data.message);
       } catch (error) {
         console.log(error);
+        console.log(error.message);
       }
     }
 
     if (updatedPassengerProfileStatus != null) {
       try {
         const response = await axios.patch(
-          "https://xxtmw06j-3002.inc1.devtunnels.ms/admin/passenger-profiles/status",
+          `${localStorage.getItem("baseUrl")}admin/passenger-profiles/status`,
           {
             passengerProfileId: formData.passengerProfile.id,
             status: updatedPassengerProfileStatus,
@@ -312,12 +347,14 @@ const SingleCustomer = () => {
           }
         );
         console.log(response);
+        alert(response.data.message);
       } catch (error) {
         console.log(error);
+        console.log(error.message);
       }
     }
 
-    // window.location.reload();
+    window.location.reload();
   };
 
   return (

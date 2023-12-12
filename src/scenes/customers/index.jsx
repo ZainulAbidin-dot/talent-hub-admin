@@ -23,8 +23,19 @@ const Customers = ({ userType, role }) => {
 
   const { data, isLoading } = useGetCustomersQuery(role);
 
-  console.log(data);
   const columns = [
+    {
+      field: "profilePic",
+      headerName: "Profile Pic",
+      flex: 0.4,
+      renderCell: (params) => {
+        return (
+          <>
+            <Avatar src={params.value} />
+          </>
+        );
+      },
+    },
     {
       field: "_id",
       headerName: "ID",
@@ -47,19 +58,6 @@ const Customers = ({ userType, role }) => {
       flex: 0.5,
       renderCell: (params) => {
         return params.value.replace(/^(\d{3})(\d{3})(\d{4})/, "($1)$2-$3");
-      },
-    },
-    {
-      field: "profilePic",
-      headerName: "Profile Pic",
-      flex: 0.4,
-      renderCell: (params) => {
-        console.log(params);
-        return (
-          <>
-            <Avatar src={params.value} />
-          </>
-        );
       },
     },
     {
@@ -115,22 +113,16 @@ const Customers = ({ userType, role }) => {
     },
   ];
 
-  const handleSaveClick = () => {
-    console.log("Save Click");
-  };
+  const handleSaveClick = () => {};
 
   const handleEditClick = (id) => {
     dispatch(setCustomerId(id));
     navigate(`/single-customer/${id}`, { state: { customerId: id } });
   };
 
-  const handleCancelClick = () => {
-    console.log("Cancel Click");
-  };
+  const handleCancelClick = () => {};
 
-  const handleDeleteClick = () => {
-    console.log("Delete Click");
-  };
+  const handleDeleteClick = () => {};
 
   let modifiedData =
     data?.data?.users?.map((element) => ({

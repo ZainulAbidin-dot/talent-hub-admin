@@ -40,8 +40,6 @@ const RapidRides = () => {
     };
   });
 
-  console.log(reformedData);
-
   const handleViewClick = (id) => {
     navigate(`/single-customer/${id}`, { state: { customerId: id } });
   };

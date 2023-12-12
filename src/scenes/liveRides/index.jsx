@@ -23,7 +23,6 @@ const LiveRides = (props) => {
         lng: ride.driverLocation.lng,
       }));
       setLatLng(reformedData);
-      console.log("Geography data:", reformedData);
     }
   }, [data]);
 
@@ -36,7 +35,6 @@ const LiveRides = (props) => {
   });
 
   const onMarkerClick = (name, marker, rideType, rideStatus) => {
-    console.log("Opening Info Window");
     setMapState({
       selectedPlace: name,
       activeMarker: marker,
@@ -47,7 +45,6 @@ const LiveRides = (props) => {
   };
 
   const onInfoWindowClose = () => {
-    console.log("Closing Info Window");
     setMapState({
       activeMarker: null,
       showingInfoWindow: false,
@@ -57,8 +54,6 @@ const LiveRides = (props) => {
   };
 
   const onViewDetails = (id, rideType, e) => {
-    console.log(e);
-    console.log("View Details", id, rideType);
     if (id != null && rideType != null) {
       navigate(`/single-ride/${id}`, {
         state: {

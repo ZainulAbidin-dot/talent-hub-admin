@@ -15,6 +15,9 @@ import { useDispatch } from "react-redux";
 import { setAuthToken, setPathName, setUserId } from "state";
 import axios from "axios";
 import { useState } from "react";
+import { IconButton, Menu, MenuItem, Toolbar } from "@mui/material";
+import { SettingsOutlined } from "@mui/icons-material";
+import FlexBetween from "components/FlexBetween";
 
 function Copyright(props) {
   return (
@@ -42,55 +45,127 @@ export default function Login() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [phoneNumber, setPhoneNumber] = useState("");
+  const [url, setUrl] = useState("Please select a server...");
+
+  const [anchorEl2, setAnchorEl2] = useState(null);
+  const isOpen2 = Boolean(anchorEl2);
+  const handleClick2 = (event) => setAnchorEl2(event.currentTarget);
+  const handleClose2 = (e, url) => {
+    e.preventDefault();
+    if (url === "backdropClick") {
+      setAnchorEl2(null);
+      return;
+    }
+    localStorage.setItem("baseUrl", url);
+    setUrl(url);
+    setAnchorEl2(null);
+  };
 
   const handleSubmitPhoneNumber = async (event) => {
     event.preventDefault();
+    if (localStorage.getItem("baseUrl") === null) {
+      alert("Please select a server...");
+      return;
+    }
+
     const data = new FormData(event.currentTarget);
     setPhoneNumber(data.get("phoneNumber").replaceAll(" ", ""));
-    console.log({
-      phoneNumber: data.get("phoneNumber"),
-    });
 
     await axios
-      .post("https://xxtmw06j-3002.inc1.devtunnels.ms/auth/phone-number", {
+      .post(`${localStorage.getItem("baseUrl")}auth/phone-number`, {
         phoneNumber: data.get("phoneNumber").replaceAll(" ", ""),
       })
       .then((res) => {
         console.log(res.data);
+        alert(`OTP sent ${res.data.devOnlyData.otpCode}`);
+      })
+      .catch((err) => {
+        console.log(err.message);
       });
   };
 
   const handleSubmitOTPCode = async (event) => {
     event.preventDefault();
+
+    if (localStorage.getItem("baseUrl") === null) {
+      alert("Please select a server...");
+      return;
+    }
     const data = new FormData(event.currentTarget);
-    console.log({
-      otpCode: data.get("otpCode"),
-    });
 
     await axios
-      .post("https://xxtmw06j-3002.inc1.devtunnels.ms/auth/otp", {
+      .post(`${localStorage.getItem("baseUrl")}auth/otp`, {
         otpCode: data.get("otpCode").replaceAll(" ", ""),
         phoneNumber: phoneNumber,
         fcmToken: "qwdf",
       })
       .then((res) => {
-        console.log(res.data);
         if (res.data?.data?.token) {
           dispatch(setUserId(res.data.data.user.id));
           dispatch(setAuthToken(res.data.data.token));
           localStorage.setItem("token", res.data.data.token);
-          localStorage.setItem(
-            "baseUrl",
-            "https://xxtmw06j-3002.inc1.devtunnels.ms/"
-          );
+          localStorage.setItem("fullName", res.data.data.user.data.fullName);
+          localStorage.setItem("roles", res.data.data.user.data.roles);
+          // localStorage.setItem(
+          //   "baseUrl",
+          //   "https://xxtmw06j-3002.inc1.devtunnels.ms/"
+          // );
           dispatch(setPathName("dashboard"));
           navigate("/dashboard");
         }
+      })
+      .catch((err) => {
+        console.log(err.message);
       });
   };
 
   return (
     <ThemeProvider theme={defaultTheme}>
+      <Toolbar sx={{ justifyContent: "space-between" }}>
+        <FlexBetween>
+          <IconButton onClick={handleClick2}>
+            <SettingsOutlined sx={{ fontSize: "25px" }} />
+            <Typography
+              sx={{
+                fontSize: "14px",
+                fontWeight: "bold",
+              }}
+            >
+              {url}
+            </Typography>
+          </IconButton>
+          <Menu
+            anchorEl={anchorEl2}
+            open={isOpen2}
+            onClose={handleClose2}
+            anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+          >
+            <MenuItem
+              onClick={(e) =>
+                handleClose2(e, process.env.REACT_APP_API_URL_LOCAL)
+              }
+            >
+              Local Url
+            </MenuItem>
+
+            <MenuItem
+              onClick={(e) =>
+                handleClose2(e, process.env.REACT_APP_API_URL_PORT_FORWARD)
+              }
+            >
+              Dev Url
+            </MenuItem>
+
+            <MenuItem
+              onClick={(e) =>
+                handleClose2(e, process.env.REACT_APP_API_URL_LIVE)
+              }
+            >
+              Production Url
+            </MenuItem>
+          </Menu>
+        </FlexBetween>
+      </Toolbar>
       <Grid container component="main" sx={{ height: "100vh" }}>
         <CssBaseline />
         <Grid

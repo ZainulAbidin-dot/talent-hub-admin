@@ -7,14 +7,10 @@ import VisibilityIcon from "@mui/icons-material/Visibility";
 import SaveIcon from "@mui/icons-material/Save";
 import CancelIcon from "@mui/icons-material/Close";
 import { GridRowModes, GridActionsCellItem } from "@mui/x-data-grid";
-import { useDispatch } from "react-redux";
-import { setCustomerId } from "state";
 import { useNavigate } from "react-router-dom";
-import Avatar from "@mui/material/Avatar";
 import DataGridCustomToolbar from "components/DataGridCustomToolbar";
 
 const TopUp = () => {
-  const dispatch = useDispatch();
   const navigate = useNavigate();
   const theme = useTheme();
   const [search, setSearch] = useState("");

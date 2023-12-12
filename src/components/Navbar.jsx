@@ -9,7 +9,7 @@ import {
 } from "@mui/icons-material";
 import FlexBetween from "components/FlexBetween";
 import { useDispatch } from "react-redux";
-import { setAuthToken, setBaseUrl, setMode } from "state";
+import { setAuthToken, setMode } from "state";
 import profileImage from "assets/profile.jpg";
 import {
   AppBar,
@@ -25,7 +25,7 @@ import {
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 
-const Navbar = ({ user, isSidebarOpen, setIsSidebarOpen }) => {
+const Navbar = ({ isSidebarOpen, setIsSidebarOpen }) => {
   const dispatch = useDispatch();
   const theme = useTheme();
   const navigate = useNavigate();
@@ -51,7 +51,7 @@ const Navbar = ({ user, isSidebarOpen, setIsSidebarOpen }) => {
       setAnchorEl2(null);
       return;
     }
-    dispatch(setBaseUrl(url));
+    localStorage.setItem("baseUrl", url);
     setAnchorEl2(null);
     window.location.reload();
   };
@@ -96,6 +96,14 @@ const Navbar = ({ user, isSidebarOpen, setIsSidebarOpen }) => {
           <FlexBetween>
             <IconButton onClick={handleClick2}>
               <SettingsOutlined sx={{ fontSize: "25px" }} />
+              <Typography
+                sx={{
+                  fontSize: "14px",
+                  fontWeight: "bold",
+                }}
+              >
+                {localStorage.getItem("baseUrl")}
+              </Typography>
             </IconButton>
             <Menu
               anchorEl={anchorEl2}
@@ -103,18 +111,22 @@ const Navbar = ({ user, isSidebarOpen, setIsSidebarOpen }) => {
               onClose={handleClose2}
               anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
             >
-              <MenuItem onClick={() => handleClose2("http://localhost:3002/")}>
+              <MenuItem
+                onClick={() =>
+                  handleClose2(process.env.REACT_APP_API_URL_LOCAL)
+                }
+              >
                 Local Url
               </MenuItem>
               <MenuItem
                 onClick={() =>
-                  handleClose2("https://xxtmw06j-3002.inc1.devtunnels.ms/")
+                  handleClose2(process.env.REACT_APP_API_URL_PORT_FORWARD)
                 }
               >
                 Dev Url
               </MenuItem>
               <MenuItem
-                onClick={() => handleClose2("https://developer.pirayo.com/")}
+                onClick={() => handleClose2(process.env.REACT_APP_API_URL_LIVE)}
               >
                 Production Url
               </MenuItem>
@@ -135,7 +147,7 @@ const Navbar = ({ user, isSidebarOpen, setIsSidebarOpen }) => {
               <Box
                 component="img"
                 alt="profile"
-                src={user?.data?.user?.profilePic || profileImage}
+                src={profileImage}
                 height="32px"
                 width="32px"
                 borderRadius="50%"
@@ -147,13 +159,13 @@ const Navbar = ({ user, isSidebarOpen, setIsSidebarOpen }) => {
                   fontSize="0.85rem"
                   sx={{ color: theme.palette.secondary[100] }}
                 >
-                  {user?.data?.user?.fullName}
+                  {localStorage.getItem("fullName")}
                 </Typography>
                 <Typography
                   fontSize="0.75rem"
                   sx={{ color: theme.palette.secondary[200] }}
                 >
-                  {user?.data?.user?.data.roles.join(", ")}
+                  {localStorage.getItem("roles")}
                 </Typography>
               </Box>
               <ArrowDropDownOutlined

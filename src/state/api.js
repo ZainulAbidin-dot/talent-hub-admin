@@ -1,14 +1,10 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
-const token = localStorage.getItem("token");
-
 export const api = createApi({
   baseQuery: fetchBaseQuery({
     baseUrl: localStorage.getItem("baseUrl"),
-    prepareHeaders: (headers, { getState }) => {
-      const token = getState().global.authToken;
-      console.log("token from api", token);
-      // Add your bearer token to the headers
+    prepareHeaders: (headers) => {
+      const token = localStorage.getItem("token");
       headers.set("authorization", `Bearer ${token}`);
       return headers;
     },

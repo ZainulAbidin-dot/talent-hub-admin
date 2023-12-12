@@ -44,8 +44,6 @@ const SharedRides = () => {
     };
   });
 
-  console.log(reformedData);
-
   const handleViewClick = (id) => {
     navigate(`/single-customer/${id}`, { state: { customerId: id } });
   };
@@ -166,9 +164,7 @@ const SharedRides = () => {
     });
   };
 
-  const handleDeleteClick = () => {
-    console.log("Delete Click");
-  };
+  const handleDeleteClick = () => {};
 
   return (
     <Box m="1.5rem 2.5rem">

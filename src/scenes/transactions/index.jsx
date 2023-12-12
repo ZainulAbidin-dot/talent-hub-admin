@@ -46,8 +46,6 @@ const Transactions = () => {
     }
   }, [data]);
 
-  console.log(data);
-  console.log(reformedData);
   const columns = [
     {
       field: "_id",
