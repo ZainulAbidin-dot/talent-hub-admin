@@ -44,6 +44,9 @@ const Navbar = ({ isSidebarOpen, setIsSidebarOpen }) => {
     setAnchorEl(null);
     dispatch(setAuthToken(null));
     localStorage.removeItem("token");
+    localStorage.removeItem("baseUrl");
+    localStorage.removeItem("roles");
+    localStorage.removeItem("fullName");
     navigate("/login");
   };
   const handleClose2 = (url) => {
