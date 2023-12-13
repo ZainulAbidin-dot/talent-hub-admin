@@ -12,17 +12,18 @@ import {
   useMediaQuery,
 } from "@mui/material";
 import Header from "components/Header";
-import { useGetCustomersQuery, useGetProductsQuery } from "state/api";
+import { useGetReportsQuery } from "state/api";
 
 const Review = ({
   _id,
-  name,
+  title,
   description,
-  price,
+  status,
   rating,
-  category,
-  supply,
-  stat,
+  priority,
+  creator,
+  ride,
+  assignee,
 }) => {
   const theme = useTheme();
   const [isExpanded, setIsExpanded] = useState(false);
@@ -41,17 +42,17 @@ const Review = ({
           color={theme.palette.secondary[700]}
           gutterBottom
         >
-          {category}
+          {title}
         </Typography>
         <Typography sx={{ mb: "1.5rem" }} color={theme.palette.secondary[400]}>
-          {name}
+          {description}
         </Typography>
         <Typography sx={{ mb: "1.5rem" }} color={theme.palette.secondary[400]}>
-          ${Number(price).toFixed(2)}
+          Status: {status}
         </Typography>
         <Rating value={rating} readOnly />
 
-        <Typography variant="body2">{description}</Typography>
+        <Typography variant="body2">{`Priority: ${priority}`}</Typography>
       </CardContent>
       <CardActions>
         <Button
@@ -72,12 +73,19 @@ const Review = ({
       >
         <CardContent>
           <Typography>id: {_id}</Typography>
-          <Typography>Supply Left: {supply}</Typography>
+          <Typography>Creator Id: {creator.id}</Typography>
+          <Typography>Creator Name: {creator.name}</Typography>
+          <Typography>Creator Role: {creator.role}</Typography>
           <Typography>
-            Yearly Sales This Year: {stat.yearlySalesTotal}
+            Assignee Id: {assignee && assignee.id ? assignee.id : "Unassigned"}
           </Typography>
           <Typography>
-            Yearly Units Sold This Year: {stat.yearlyTotalSoldUnits}
+            Assignee Name:{" "}
+            {assignee && assignee.id ? assignee.name : "Unassigned"}
+          </Typography>
+          <Typography>Ride Id: {ride.id ? ride.id : "Unassigned"}</Typography>
+          <Typography>
+            Ride Type: {ride.id ? ride.type : "Unassigned"}
           </Typography>
         </CardContent>
       </Collapse>
@@ -86,11 +94,11 @@ const Review = ({
 };
 
 const Reviews = () => {
-  const { data, isLoading } = useGetCustomersQuery("driver");
+  const { data, isLoading } = useGetReportsQuery();
   const isNonMobile = useMediaQuery("(min-width: 1000px)");
 
   let modifiedData =
-    data?.data?.users?.map((element) => ({
+    data?.data?.map((element) => ({
       ...element,
       _id: element.id,
     })) || [];
@@ -110,20 +118,18 @@ const Reviews = () => {
             "& > div": { gridColumn: isNonMobile ? undefined : "span 4" },
           }}
         >
-          {modifiedData.map((user) => (
+          {modifiedData.map((report) => (
             <Review
-              key={user._id}
-              _id={user._id}
-              name={user.fullName}
-              description={user.status}
-              price={5000}
+              key={report._id}
+              _id={report._id}
               rating={2}
-              category={"Driver"}
-              supply={user.email}
-              stat={{
-                yearlySalesTotal: 2000,
-                yearlyTotalSoldUnits: 2000,
-              }}
+              title={report.title}
+              description={report.description}
+              ride={report.ride}
+              creator={report.creator}
+              priority={report.priority}
+              status={report.status}
+              assignee={report.assignee}
             />
           ))}
         </Box>

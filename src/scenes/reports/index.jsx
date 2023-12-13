@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Box, useTheme } from "@mui/material";
 import { DataGrid, GridActionsCellItem } from "@mui/x-data-grid";
-import { useGetDiscountQuery } from "state/api";
+import { useGetDiscountQuery, useGetReportsQuery } from "state/api";
 import Header from "components/Header";
 import DataGridCustomToolbar from "components/DataGridCustomToolbar";
 import DeleteIcon from "@mui/icons-material/DeleteOutlined";
@@ -20,7 +20,7 @@ const Report = () => {
   const [search, setSearch] = useState("");
 
   const [searchInput, setSearchInput] = useState("");
-  const { data, isLoading } = useGetDiscountQuery();
+  const { data, isLoading } = useGetReportsQuery();
 
   const [addDiscount, setAddDiscount] = useState(false);
 
@@ -78,16 +78,17 @@ const Report = () => {
   const reformedData = data?.data?.map((item) => {
     return {
       _id: item.id,
-      name: item.name,
+      title: item.title,
       description: item.description,
-      code: item.code,
-      type: item.type,
-      startDate: item.startDate,
-      endDate: item.endDate,
-      maxUses: item.maxUses,
-      isValid: item.isValid,
-      percentage: item.type === "percentage" ? item.percentage : 0,
-      amount: item.type === "amount" ? item.amount : 0,
+      status: item.status,
+      priority: item.priority,
+      creatorId: item.creator.id,
+      creatorName: item.creator.name,
+      creatorRole: item.creator.role,
+      rideId: item.ride.id,
+      rideType: item.ride.type,
+      assigneeId: item.assignee != null ? item.assignee.id : "Null",
+      assigneeName: item.assignee != null ? item.assignee.name : "Null",
     };
   });
 
@@ -113,8 +114,8 @@ const Report = () => {
       editable: true,
     },
     {
-      field: "name",
-      headerName: "Name",
+      field: "title",
+      headerName: "Title",
       flex: 1,
     },
     {
@@ -123,43 +124,48 @@ const Report = () => {
       flex: 1,
     },
     {
-      field: "code",
-      headerName: "Code",
+      field: "status",
+      headerName: "Status",
       flex: 1,
     },
     {
-      field: "type",
-      headerName: "Type",
+      field: "priority",
+      headerName: "Priority",
       flex: 0.5,
     },
     {
-      field: "maxUses",
-      headerName: "Max Uses",
+      field: "creatorId",
+      headerName: "Creator Id",
       flex: 1,
     },
     {
-      field: "isValid",
-      headerName: "Is Valid",
+      field: "creatorName",
+      headerName: "Creator Name",
       flex: 1,
     },
     {
-      field: "percentage",
-      headerName: "Percentage",
+      field: "creatorRole",
+      headerName: "Creator Role",
       flex: 1,
     },
     {
-      field: "amount",
-      headerName: "Amount",
+      field: "rideId",
+      headerName: "Ride Id",
       flex: 1,
     },
     {
-      field: "startDate",
-      headerName: "Start Date",
+      field: "rideType",
+      headerName: "Ride Type",
       flex: 1,
     },
     {
-      field: "endDate",
-      headerName: "End Date",
+      field: "assigneeId",
+      headerName: "Assignee Id",
+      flex: 1,
+    },
+    {
+      field: "assigneeName",
+      headerName: "Assignee Name",
       flex: 1,
     },
     {
@@ -406,8 +412,10 @@ const Report = () => {
           initialState={{
             columns: {
               columnVisibilityModel: {
-                driverPhoneNumber: false,
-                createdAt: false,
+                _id: false,
+                creatorId: false,
+                rideId: false,
+                assigneeId: false,
               },
             },
           }}

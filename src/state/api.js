@@ -28,6 +28,8 @@ export const api = createApi({
     "Dashboard",
     "TopUp",
     "SingleTopUp",
+    "Reports",
+    "SingleReport"
   ],
   endpoints: (build) => ({
     getUser: build.query({
@@ -108,7 +110,14 @@ export const api = createApi({
       query: (id) => `admin/topups/${id}`,
       providesTags: ["SingleTopUp"],
     }),
-
+    getReports: build.query({
+      query: () => "admin/report-tickets",
+      providesTags: ["Reports"],
+    }),
+    getSingleReport: build.query({
+      query: (id) => `admin/report-tickets/${id}`,
+      providesTags: ["SingleReport"],
+    }),
 
 
 
@@ -137,5 +146,7 @@ export const {
   useGetDashboardQuery,
   useGetTopUpQuery,
   useGetSingleTopUpQuery,
-  useGetAllDocumentsByUserIdQuery
+  useGetAllDocumentsByUserIdQuery,
+  useGetReportsQuery,
+  useGetSingleReportQuery
 } = api;
