@@ -12,7 +12,7 @@ import {
   useMediaQuery,
 } from "@mui/material";
 import Header from "components/Header";
-import { useGetProductsQuery } from "state/api";
+import { useGetCustomersQuery, useGetProductsQuery } from "state/api";
 
 const Review = ({
   _id,
@@ -43,7 +43,7 @@ const Review = ({
         >
           {category}
         </Typography>
-        <Typography variant="h5" component="div">
+        <Typography sx={{ mb: "1.5rem" }} color={theme.palette.secondary[400]}>
           {name}
         </Typography>
         <Typography sx={{ mb: "1.5rem" }} color={theme.palette.secondary[400]}>
@@ -86,13 +86,19 @@ const Review = ({
 };
 
 const Reviews = () => {
-  const { data, isLoading } = useGetProductsQuery();
+  const { data, isLoading } = useGetCustomersQuery("driver");
   const isNonMobile = useMediaQuery("(min-width: 1000px)");
+
+  let modifiedData =
+    data?.data?.users?.map((element) => ({
+      ...element,
+      _id: element.id,
+    })) || [];
 
   return (
     <Box m="1.5rem 2.5rem">
       <Header title="REVIEWS" subtitle="See your list of reviews" />
-      {data || !isLoading ? (
+      {modifiedData && !isLoading ? (
         <Box
           mt="20px"
           display="grid"
@@ -104,30 +110,22 @@ const Reviews = () => {
             "& > div": { gridColumn: isNonMobile ? undefined : "span 4" },
           }}
         >
-          {data.map(
-            ({
-              _id,
-              name,
-              description,
-              price,
-              rating,
-              category,
-              supply,
-              stat,
-            }) => (
-              <Review
-                key={_id}
-                _id={_id}
-                name={name}
-                description={description}
-                price={price}
-                rating={rating}
-                category={category}
-                supply={supply}
-                stat={stat}
-              />
-            )
-          )}
+          {modifiedData.map((user) => (
+            <Review
+              key={user._id}
+              _id={user._id}
+              name={user.fullName}
+              description={user.status}
+              price={5000}
+              rating={2}
+              category={"Driver"}
+              supply={user.email}
+              stat={{
+                yearlySalesTotal: 2000,
+                yearlyTotalSoldUnits: 2000,
+              }}
+            />
+          ))}
         </Box>
       ) : (
         <>Loading...</>

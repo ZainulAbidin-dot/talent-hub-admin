@@ -105,6 +105,10 @@ const navItems = [
     text: "Top-Up",
     icon: <TopicOutlined />,
   },
+  {
+    text: "Reports",
+    icon: <ReceiptLongOutlined />,
+  },
 ];
 
 const Sidebar = ({
