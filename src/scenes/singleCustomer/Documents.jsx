@@ -1,7 +1,7 @@
 import { useParams } from "react-router-dom";
-import { useGetAllDocumentsByUserIdQuery } from 'state/api';
-import { Box, Typography } from '@mui/material';
-import DocumentsDataGrid from './DocumentsDataGrid';
+import { useGetAllDocumentsByUserIdQuery } from "state/api";
+import { Box, Typography } from "@mui/material";
+import DocumentsDataGrid from "./DocumentsDataGrid";
 
 function Documents() {
   const { id: userId } = useParams();
@@ -22,13 +22,24 @@ function Documents() {
   } else if (isError) {
     content = <Typography>error</Typography>;
   } else {
-    if (documentsResponse.data.documents.length === 0 && documentsResponse.data.vehicles.length === 0) {
+    if (
+      documentsResponse.data.documents.length === 0 &&
+      documentsResponse.data.vehicles.length === 0
+    ) {
       content = <Typography>No Documents</Typography>;
     } else {
       content = (
         <>
-          <DocumentsDataGrid data={documentsResponse.data.documents} title="User Documents" />
-          <DocumentsDataGrid data={documentsResponse.data.vehicles} title="User Vehicles" />
+          <DocumentsDataGrid
+            data={documentsResponse.data.documents}
+            title="User Documents"
+          />
+          {documentsResponse.data.vehicles.length > 0 && (
+            <DocumentsDataGrid
+              data={documentsResponse.data.vehicles}
+              title="User Vehicles"
+            />
+          )}
         </>
       );
     }
@@ -42,4 +53,3 @@ function Documents() {
 }
 
 export default Documents;
-

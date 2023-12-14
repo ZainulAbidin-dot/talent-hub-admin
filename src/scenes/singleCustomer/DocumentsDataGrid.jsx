@@ -1,39 +1,29 @@
-import { useState } from 'react';
-import { Box, Button, Card, CardMedia, FormControl, InputLabel, MenuItem, Select, TextField, Typography } from '@mui/material';
-import { DOCUMENT_AND_TOPUP_STATUS } from './config';
-import { DataGrid, useGridApiContext } from '@mui/x-data-grid';
-
+import * as React from "react";
+import { DOCUMENT_AND_TOPUP_STATUS } from "./config";
+import {
+  Card,
+  CardMedia,
+  Dialog,
+  DialogContent,
+  DialogTitle,
+} from "@mui/material";
+import { DataGrid } from "@mui/x-data-grid";
+import Snackbar from "@mui/material/Snackbar";
+import Alert from "@mui/material/Alert";
+import { useState } from "react";
+import axios from "axios";
+import { useSelector } from "react-redux";
 
 function DocumentsDataGrid({ data, title }) {
+  const accessToken = useSelector((state) => state.global.authToken);
+
   const [documents, setDocuments] = useState(data);
   const [openModal, setOpenModal] = useState(false);
   const [modalImage, setModalImage] = useState("");
 
-  const handleRemarksChange = (event, documentId) => {
-    const { value } = event.target;
-    console.log(value);
-    const newDocuments = documents.map((document) => {
-      if (document.id === documentId) {
-        return { ...document, remarks: value };
-      }
-      return document;
-    });
+  const [snackbar, setSnackbar] = useState(null);
 
-    setDocuments(newDocuments);
-  };
-
-  const handleStatusChange = (event, documentId) => {
-    const { value } = event.target;
-    const newDocuments = documents.map((document) => {
-      if (document.id === documentId) {
-        return { ...document, status: value };
-      }
-      return document;
-    });
-
-    setDocuments(newDocuments);
-  };
-
+  const handleCloseSnackbar = () => setSnackbar(null);
 
   const columns = [
     {
@@ -67,9 +57,10 @@ function DocumentsDataGrid({ data, title }) {
     {
       field: "status",
       headerName: "Status",
-      width: 180,
-      renderCell: renderSelectEditInputCell,
+      width: 220,
       editable: true,
+      type: "singleSelect",
+      valueOptions: DOCUMENT_AND_TOPUP_STATUS,
     },
     {
       field: "remarks",
@@ -79,70 +70,103 @@ function DocumentsDataGrid({ data, title }) {
     },
   ];
 
-  if (data.length === 0) {
-    return (
-      <Typography>No Documents: {title}</Typography>
-    );
-  }
+  const handleCloseModal = () => {
+    setOpenModal(false);
+  };
 
+  const handleCellEditCommit = React.useCallback(
+    async (params) => {
+      console.log("Params", params);
+      let finalizedObject;
+      const updatedRows = documents.map((document) => {
+        if (document.id === params.id) {
+          const updatedObject = { ...document, [params.field]: params.value };
+
+          if (params.field === "status" && params.value === "rejected") {
+            if (
+              updatedObject.remarks === "Document is not uploaded yet." ||
+              updatedObject.remarks === "" ||
+              updatedObject.remarks === "Document is approved."
+            ) {
+              updatedObject.remarks = "Not approved by Admin";
+            }
+
+            console.log(updatedObject);
+          } else {
+            console.log(updatedObject);
+          }
+
+          finalizedObject = updatedObject;
+          return updatedObject;
+        }
+        return document;
+      });
+
+      try {
+        const response = await axios.patch(
+          `${localStorage.getItem("baseUrl")}admin/documents/status`,
+          {
+            documentId: finalizedObject.id,
+            status: finalizedObject.status,
+            remarks: finalizedObject.remarks,
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
+        console.log(response);
+
+        setSnackbar({
+          children: response.data.message,
+          severity: "success",
+        });
+      } catch (error) {
+        console.log(error);
+        console.log(error.message);
+      }
+
+      setDocuments(updatedRows);
+    },
+    [documents]
+  );
 
   return (
-    <Box
-      sx={{
-        width: "70vw",
-        margin: "2rem auto",
-        flexBasis: '1'
-      }}
-    >
-      <Typography variant="h5" style={{ marginBottom: "1rem" }}>
-        {title}
-      </Typography>
+    <div style={{ height: 400, width: "100%" }}>
       <DataGrid
-        autoHeight
         rows={documents}
         columns={columns}
-        disableRowSelectionOnClick
+        onCellEditCommit={handleCellEditCommit}
         hideFooterPagination
         hideFooter
-        rowHeight={(5 * 16)}
-        rowSpacingType='margin'
+        rowHeight={5 * 16}
+        rowSpacingType="margin"
         rowSpacing={5}
       />
-      <Button variant="contained" color="primary" style={{ marginTop: "1rem" }}>
-        Save Changes
-      </Button>
-    </Box >
+      {!!snackbar && (
+        <Snackbar
+          open
+          anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+          onClose={handleCloseSnackbar}
+          autoHideDuration={6000}
+        >
+          <Alert {...snackbar} onClose={handleCloseSnackbar} />
+        </Snackbar>
+      )}
+      <Dialog open={openModal} onClose={handleCloseModal}>
+        <DialogTitle>Zoomed Image</DialogTitle>
+        <DialogContent>
+          <img
+            src={modalImage}
+            alt="Zoomed"
+            style={{ width: 500, height: 500 }}
+          />
+        </DialogContent>
+      </Dialog>
+    </div>
   );
 }
 
 export default DocumentsDataGrid;
-
-function SelectEditInputCell(props) {
-  const { id, value, field } = props;
-  const apiRef = useGridApiContext();
-
-  const handleChange = async (event) => {
-    await apiRef.current.setEditCellValue({ id, field, value: event.target.value });
-    apiRef.current.stopCellEditMode({ id, field });
-  };
-
-  return (
-    <Select
-      value={value}
-      onChange={handleChange}
-      size="small"
-      sx={{ height: 1 }}
-      native
-      autoFocus
-    >
-      {DOCUMENT_AND_TOPUP_STATUS.map(status => (
-        <option value={status}>{status}</option>
-      ))}
-    </Select>
-  );
-
-}
-
-function renderSelectEditInputCell(params) {
-  return <SelectEditInputCell {...params} />;
-};
