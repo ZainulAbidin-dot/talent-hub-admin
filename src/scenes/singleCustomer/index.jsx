@@ -25,6 +25,7 @@ import DialogTitle from "@mui/material/DialogTitle";
 import { DataGrid } from "@mui/x-data-grid";
 import axios from "axios";
 import { useSelector } from "react-redux";
+import Documents from './Documents';
 
 const SingleCustomer = () => {
   const theme = useTheme();
@@ -56,55 +57,6 @@ const SingleCustomer = () => {
     },
   ];
 
-  const {
-    data: documents,
-    isLoading: isDocumentsLoading,
-    isError: isDocumentsError,
-    error: documentsError,
-  } = useGetAllDocumentsByUserIdQuery(id);
-
-  if (isDocumentsLoading === false && isDocumentsError === true) {
-    console.log("documentsError", documentsError);
-  }
-
-  let formattedDocs = [];
-
-  if (isDocumentsLoading === false && isDocumentsError === false) {
-    const profileDocuments = documents.data.documents.map((item) => {
-      return {
-        id: item.id,
-        name: item.name,
-        isCorrect: item.status,
-        image: item.url,
-        remarks: item.status === "approved" ? "No Remarks" : item.remarks,
-      };
-    });
-
-    let vehicleDocuments = [];
-    documents.data.vehicles.forEach((item) => {
-      item.documents.forEach((doc) => {
-        vehicleDocuments = [
-          ...vehicleDocuments,
-          {
-            id: doc.id,
-            name: doc.name,
-            isCorrect: doc.status,
-            image: doc.url,
-            remarks: doc.status === "approved" ? "No Remarks" : doc.remarks,
-          },
-        ];
-      });
-    });
-
-    formattedDocs = [...profileDocuments, ...vehicleDocuments];
-  }
-
-  const rows = formattedDocs || [];
-
-  console.log("formattedDocs", formattedDocs);
-  const [isVerified, setIsVerified] = useState(rows);
-
-  const [toggleBtn, setToggleBtn] = useState(Array(rows.length).fill(false));
   const accessToken = useSelector((state) => state.global.authToken);
 
   const [anchorEl, setAnchorEl] = React.useState(null);
@@ -115,98 +67,6 @@ const SingleCustomer = () => {
   const handleClose = () => {
     setAnchorEl(null);
   };
-  const columns = [
-    {
-      field: "name",
-      headerName: "Picture Name",
-      width: 250,
-    },
-    {
-      field: "picture",
-      headerName: "Picture",
-      width: 250,
-      renderCell: (params) => (
-        <Card>
-          <CardMedia
-            component="img"
-            style={{
-              height: 40, // Adjust the size as needed
-              width: 40,
-              cursor: "pointer",
-            }}
-            onClick={() => {
-              setModalImage(params.row.image || profileImage);
-              setOpenModal(true);
-            }}
-            image={
-              params.row.name === "Assign Admin Role"
-                ? profileImage
-                : params.row.image || profileImage
-            }
-            title="User Image"
-          />
-        </Card>
-      ),
-    },
-    {
-      field: "status",
-      headerName: "Status",
-      width: 250,
-      renderCell: (params) => (
-        <>
-          <TextField
-            id={`inputField-${params.id}`}
-            label={params.row.isCorrect}
-            variant="outlined"
-            size="small"
-            fullWidth
-            required
-            // You can handle the input change with onChange prop
-            onChange={(e) => handleSelect(params, e.target.value)}
-          />
-          <select name="status" id={`inputField-${params.id}`}>
-            <option value="approved">Approve</option>
-            <option value="suspended">Reject</option>
-            <option value="underReview">Pending</option>
-          </select>
-        </>
-
-        // <Menu
-        //   id={`menu-${params.id}`}
-        //   anchorEl={anchorEl}
-        //   open={open && anchorEl === `button-${params.id}`}
-        //   onClose={handleClose}
-        //   MenuListProps={{
-        //     "aria-labelledby": `button-${params.id}`,
-        //   }}
-        // >
-        //   <MenuItem onClick={() => handleSelect(params, "approved")}>
-        //     Approve
-        //   </MenuItem>
-        //   <MenuItem onClick={() => handleSelect(params, "rejected")}>
-        //     Reject
-        //   </MenuItem>
-        // </Menu>
-      ),
-    },
-    {
-      field: "inputField",
-      headerName: "Remarks",
-      width: 250,
-      renderCell: (params) => (
-        <TextField
-          id={`inputField-${params.id}`}
-          label={params.row.remarks + " Remark"}
-          variant="outlined"
-          size="small"
-          fullWidth
-          required
-          // You can handle the input change with onChange prop
-          onChange={(e) => handleRemarks(params, e.target.value)}
-        />
-      ),
-    },
-  ];
 
   useEffect(() => {
     if (!isLoading && data != null && data !== undefined) {
@@ -224,84 +84,8 @@ const SingleCustomer = () => {
     }
   }, [isLoading, data]);
 
-  const handleSelect = (params, value) => {
-    console.log(params, value);
-    setIsVerified((prevIsVerified) => {
-      return prevIsVerified.map((item) => {
-        if (item.id === params.id) {
-          return {
-            id: item.id,
-            name: item.name,
-            isCorrect: value,
-            image: item.image,
-            remarks: item.remarks,
-          };
-        }
-        return item;
-      });
-    });
-  };
-
-  const handleRemarks = (params, value) => {
-    setIsVerified((prevIsVerified) => {
-      return prevIsVerified.map((item) => {
-        if (item.id === params.id) {
-          return {
-            id: item.id,
-            name: item.name,
-            isCorrect: item.isCorrect,
-            image: item.image,
-            remarks: value,
-          };
-        }
-        return item;
-      });
-    });
-  };
-
   const handleCloseModal = () => {
     setOpenModal(false);
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    // Update data in the backend
-
-    console.log(isVerified);
-    try {
-      outerLoop: for (const item of isVerified) {
-        console.log(item);
-        if (
-          (!item.isCorrect !== "approved" && item.remarks === "") ||
-          (!item.isCorrect !== "approved" &&
-            item.remarks === "Document is not uploaded yet.")
-        ) {
-          alert("Please add remarks when you reject a document.");
-          break outerLoop;
-        } else {
-          const response = await axios.patch(
-            `${localStorage.getItem("baseUrl")}admin/documents/status`,
-            {
-              documentId: item.id,
-              status: item.isCorrect,
-              remarks: item.isCorrect === "approved" ? "" : item.remarks,
-            },
-            {
-              headers: {
-                Authorization: `Bearer ${accessToken}`,
-                "Content-Type": "application/json",
-              },
-            }
-          );
-
-          console.log(response);
-        }
-      }
-    } catch (error) {
-      console.log(error);
-    }
-
-    window.location.reload();
   };
 
   const handleUpdatedStatusSubmit = async (e) => {
@@ -655,86 +439,86 @@ const SingleCustomer = () => {
 
                         {formData.driverProfile.vehicles
                           ? formData.driverProfile.vehicles.map(
-                              (vehicle, index) => (
-                                <Card
-                                  variant="outlined"
-                                  style={{
-                                    height: "50vh",
-                                    backgroundColor: "transparent",
-                                    width: "20vw",
-                                    display: "flex",
-                                    flexDirection: "column",
-                                    alignItems: "center",
-                                    justifyContent: "center",
-                                    margin: "0 auto",
-                                  }}
+                            (vehicle, index) => (
+                              <Card
+                                variant="outlined"
+                                style={{
+                                  height: "50vh",
+                                  backgroundColor: "transparent",
+                                  width: "20vw",
+                                  display: "flex",
+                                  flexDirection: "column",
+                                  alignItems: "center",
+                                  justifyContent: "center",
+                                  margin: "0 auto",
+                                }}
+                              >
+                                <Typography
+                                  gutterBottom
+                                  variant="h6"
+                                  component="div"
                                 >
-                                  <Typography
-                                    gutterBottom
-                                    variant="h6"
-                                    component="div"
-                                  >
-                                    Current Selected Vehicle :{" "}
-                                    {vehicle.selected ? "True" : "False"}
-                                  </Typography>
-                                  <Typography
-                                    variant="body2"
-                                    color="text.secondary"
-                                  ></Typography>
-                                  <Typography
-                                    variant="body2"
-                                    color="text.secondary"
-                                  >
-                                    Color : {vehicle.color}
-                                  </Typography>
-                                  <Typography
-                                    variant="body2"
-                                    color="text.secondary"
-                                  >
-                                    Model : {vehicle.model}
-                                  </Typography>
-                                  <Typography
-                                    variant="body2"
-                                    color="text.secondary"
-                                  >
-                                    Year : {vehicle.year}
-                                  </Typography>
-                                  <Typography
-                                    variant="body2"
-                                    color="text.secondary"
-                                  >
-                                    No of Seats : {vehicle.noOfSeats}
-                                  </Typography>
-                                  <Typography
-                                    variant="body2"
-                                    color="text.secondary"
-                                  >
-                                    Engine Capacity: {vehicle.engineCapacity}
-                                  </Typography>
-                                  <Typography
-                                    variant="body2"
-                                    color="text.secondary"
-                                  >
-                                    Is AC Available :{" "}
-                                    {vehicle.isAcAvailable ? "True" : "False"}
-                                  </Typography>
-                                  <Typography
-                                    variant="body2"
-                                    color="text.secondary"
-                                  >
-                                    Is Trunk Available :{" "}
-                                    {vehicle.isTrunkAvailable}
-                                  </Typography>
-                                  <Typography
-                                    variant="body2"
-                                    color="text.secondary"
-                                  >
-                                    License Plate Number :{" "}
-                                    {vehicle.licensePlateNumber}
-                                  </Typography>
-                                </Card>
-                              )
+                                  Current Selected Vehicle :{" "}
+                                  {vehicle.selected ? "True" : "False"}
+                                </Typography>
+                                <Typography
+                                  variant="body2"
+                                  color="text.secondary"
+                                ></Typography>
+                                <Typography
+                                  variant="body2"
+                                  color="text.secondary"
+                                >
+                                  Color : {vehicle.color}
+                                </Typography>
+                                <Typography
+                                  variant="body2"
+                                  color="text.secondary"
+                                >
+                                  Model : {vehicle.model}
+                                </Typography>
+                                <Typography
+                                  variant="body2"
+                                  color="text.secondary"
+                                >
+                                  Year : {vehicle.year}
+                                </Typography>
+                                <Typography
+                                  variant="body2"
+                                  color="text.secondary"
+                                >
+                                  No of Seats : {vehicle.noOfSeats}
+                                </Typography>
+                                <Typography
+                                  variant="body2"
+                                  color="text.secondary"
+                                >
+                                  Engine Capacity: {vehicle.engineCapacity}
+                                </Typography>
+                                <Typography
+                                  variant="body2"
+                                  color="text.secondary"
+                                >
+                                  Is AC Available :{" "}
+                                  {vehicle.isAcAvailable ? "True" : "False"}
+                                </Typography>
+                                <Typography
+                                  variant="body2"
+                                  color="text.secondary"
+                                >
+                                  Is Trunk Available :{" "}
+                                  {vehicle.isTrunkAvailable}
+                                </Typography>
+                                <Typography
+                                  variant="body2"
+                                  color="text.secondary"
+                                >
+                                  License Plate Number :{" "}
+                                  {vehicle.licensePlateNumber}
+                                </Typography>
+                              </Card>
                             )
+                          )
                           : null}
                       </>
                     ) : null}
@@ -753,56 +537,10 @@ const SingleCustomer = () => {
                 />
               </DialogContent>
             </Dialog>
-
-            {formData.driverProfile && (
-              <>
-                <Box
-                  sx={{
-                    height: 400,
-                    width: "70vw",
-                    margin: "0 auto",
-                  }}
-                >
-                  <DataGrid
-                    rows={rows}
-                    columns={columns}
-                    initialState={{
-                      pagination: {
-                        paginationModel: {
-                          pageSize: 10,
-                        },
-                      },
-                    }}
-                    pageSizeOptions={[5, 10]}
-                    disableRowSelectionOnClick
-                  />
-                </Box>
-                <Button
-                  variant="contained"
-                  sx={{
-                    width: "70vw",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    marginTop: "1rem",
-                    marginBottom: "10rem",
-                    marginLeft: "auto",
-                    marginRight: "auto",
-                  }}
-                  color="primary"
-                  onClick={(e) => handleSubmit(e)}
-                >
-                  Save
-                </Button>
-                <Header
-                  style={{ marginBottom: "20px" }}
-                  // title="Marker Info"
-                  subtitle="Click the Save Button to save the changes."
-                />
-              </>
-            )}
           </>
         )}
+
+        <Documents />
       </Box>
     </Box>
   );
