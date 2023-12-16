@@ -122,6 +122,15 @@ export const api = createApi({
       query: (id) => `admin/documents?userId=${id}`,
       providesTags: ['Documents', 'SingleCustomer'],
     }),
+
+    updateDocument: build.mutation({
+      query: ({ formData }) => ({
+        url: `admin/documents/status`,
+        method: 'PATCH',
+        body: formData,
+      }),
+      invalidatesTags: ['Documents', 'SingleCustomer'],
+    })
   }),
 });
 
@@ -146,4 +155,5 @@ export const {
   useGetAllDocumentsByUserIdQuery,
   useGetReportsQuery,
   useGetSingleReportQuery,
+  useUpdateDocumentMutation
 } = api;

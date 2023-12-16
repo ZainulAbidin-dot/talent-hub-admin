@@ -13,14 +13,12 @@ function Documents() {
     error,
   } = useGetAllDocumentsByUserIdQuery(userId);
 
-  console.log(documentsResponse);
-
   let content = null;
 
   if (isLoading) {
     content = <Typography>Loading</Typography>;
   } else if (isError) {
-    content = <Typography>error</Typography>;
+    content = <Typography>{error.message}</Typography>;
   } else {
     if (
       documentsResponse.data.documents.length === 0 &&
@@ -34,12 +32,14 @@ function Documents() {
             data={documentsResponse.data.documents}
             title="User Documents"
           />
-          {documentsResponse.data.vehicles.length > 0 && (
-            <DocumentsDataGrid
-              data={documentsResponse.data.vehicles}
-              title="User Vehicles"
-            />
-          )}
+          {documentsResponse.data.vehicles.length > 0 &&
+            documentsResponse.data.vehicles.map((vehicle) => (
+              <DocumentsDataGrid
+                key={vehicle.id}
+                data={vehicle.documents}
+                title="Vehicle Documents"
+              />
+            ))}
         </>
       );
     }

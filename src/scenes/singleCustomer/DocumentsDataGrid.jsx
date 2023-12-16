@@ -13,6 +13,7 @@ import Alert from "@mui/material/Alert";
 import { useState } from "react";
 import axios from "axios";
 import { useSelector } from "react-redux";
+import { useUpdateDocumentMutation } from "state/api";
 
 function DocumentsDataGrid({ data, title }) {
   const accessToken = useSelector((state) => state.global.authToken);
@@ -24,6 +25,8 @@ function DocumentsDataGrid({ data, title }) {
   const [snackbar, setSnackbar] = useState(null);
 
   const handleCloseSnackbar = () => setSnackbar(null);
+
+  const [updateDocument] = useUpdateDocumentMutation();
 
   const columns = [
     {
@@ -74,64 +77,54 @@ function DocumentsDataGrid({ data, title }) {
     setOpenModal(false);
   };
 
-  const handleCellEditCommit = React.useCallback(
-    async (params) => {
-      console.log("Params", params);
-      let finalizedObject;
-      const updatedRows = documents.map((document) => {
-        if (document.id === params.id) {
-          const updatedObject = { ...document, [params.field]: params.value };
+  const handleCellEditCommit = async (params) => {
+    console.log("Params", params);
+    let finalizedObject;
+    const updatedRows = documents.map((document) => {
+      if (document.id === params.id) {
+        const updatedObject = { ...document, [params.field]: params.value };
 
-          if (params.field === "status" && params.value === "rejected") {
-            if (
-              updatedObject.remarks === "Document is not uploaded yet." ||
-              updatedObject.remarks === "" ||
-              updatedObject.remarks === "Document is approved."
-            ) {
-              updatedObject.remarks = "Not approved by Admin";
-            }
-
-            console.log(updatedObject);
-          } else {
-            console.log(updatedObject);
-          }
-
-          finalizedObject = updatedObject;
-          return updatedObject;
+        if (params.field === "status" && params.value === "rejected") {
+          updatedObject.remarks = "Not approved by Admin";
         }
-        return document;
-      });
 
-      try {
-        const response = await axios.patch(
-          `${localStorage.getItem("baseUrl")}admin/documents/status`,
-          {
-            documentId: finalizedObject.id,
-            status: finalizedObject.status,
-            remarks: finalizedObject.remarks,
-          },
-          {
-            headers: {
-              Authorization: `Bearer ${accessToken}`,
-              "Content-Type": "application/json",
-            },
-          }
-        );
-        console.log(response);
+        if (params.field === "status" && params.value === "approved") {
+          updatedObject.remarks = "Approved by Admin";
+        }
 
+        if (params.field === "status" && params.value === "uploaded") {
+          updatedObject.remarks = "Waiting for approval by Admin";
+        }
+
+        finalizedObject = updatedObject;
+        return updatedObject;
+      }
+      return document;
+    });
+
+    updateDocument({
+      formData: {
+        documentId: finalizedObject.id,
+        status: finalizedObject.status,
+        remarks: finalizedObject.remarks,
+      },
+    })
+      .then((res) => {
         setSnackbar({
-          children: response.data.message,
+          children: "Document updated successfully",
           severity: "success",
         });
-      } catch (error) {
-        console.log(error);
-        console.log(error.message);
-      }
+        setDocuments(updatedRows);
+      })
+      .catch((error) => {
+        setSnackbar({
+          children: error.message,
+          severity: "error",
+        });
+      });
 
-      setDocuments(updatedRows);
-    },
-    [documents]
-  );
+    // setDocuments(updatedRows);
+  };
 
   return (
     <div style={{ height: 400, width: "100%" }}>
@@ -155,6 +148,7 @@ function DocumentsDataGrid({ data, title }) {
           <Alert {...snackbar} onClose={handleCloseSnackbar} />
         </Snackbar>
       )}
+
       <Dialog open={openModal} onClose={handleCloseModal}>
         <DialogTitle>Zoomed Image</DialogTitle>
         <DialogContent>

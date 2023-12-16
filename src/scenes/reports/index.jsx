@@ -1,14 +1,16 @@
 import React, { useState } from "react";
 import { Box, useTheme } from "@mui/material";
 import { DataGrid, GridActionsCellItem } from "@mui/x-data-grid";
-import { useGetDiscountQuery, useGetReportsQuery } from "state/api";
+import { useGetReportsQuery } from "state/api";
+import VisibilityIcon from "@mui/icons-material/Visibility";
 import Header from "components/Header";
 import DataGridCustomToolbar from "components/DataGridCustomToolbar";
 import DeleteIcon from "@mui/icons-material/DeleteOutlined";
 import { TextField, Button, Stack } from "@mui/material";
 import MenuItem from "@mui/material/MenuItem";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
+import { ASSIGNEE } from "./config";
 
 const Report = () => {
   const theme = useTheme();
@@ -18,61 +20,50 @@ const Report = () => {
   const [pageSize, setPageSize] = useState(20);
   const [sort, setSort] = useState({});
   const [search, setSearch] = useState("");
-
+  const navigate = useNavigate();
   const [searchInput, setSearchInput] = useState("");
   const { data, isLoading } = useGetReportsQuery();
 
-  const [addDiscount, setAddDiscount] = useState(false);
+  const [addAsignee, setAddAsignee] = useState(false);
 
-  const discountDataType = [
-    {
-      value: "percentage",
-      label: "Percentage",
-    },
-    {
-      value: "amount",
-      label: "Amount",
-    },
-  ];
-
-  const [discountData, setDiscountData] = useState({
-    name: "",
-    description: "",
-    code: "",
-    type: "percentage",
-    maxUses: 0,
-    percentage: 0,
-    amount: 0,
-    startDate: Date.now(),
-    endDate: Date.now(),
+  const [reportData, setReportData] = useState({
+    reportId: "",
+    assigneeId: "admin",
   });
 
   async function handleSubmit(event) {
     event.preventDefault();
-    const data = {
-      name: discountData.name,
-      description: discountData.description,
-      code: discountData.code,
-      type: discountData.type,
-      amount: Number(discountData.amount),
-      percentage: Number(discountData.percentage),
-      maxUses: Number(discountData.maxUses),
-      startDate: discountData.startDate,
-      endDate: discountData.endDate,
-    };
+
+    let data = {};
+    if (reportData.assigneeId != null && reportData.assigneeId !== "admin") {
+      data = {
+        assigneeId: reportData.assigneeId,
+      };
+    }
+
     await axios
-      .post(`${localStorage.getItem("baseUrl")}admin/discount-codes`, data, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-          "Content-Type": "application/json",
-        },
-      })
+      .patch(
+        `${localStorage.getItem("baseUrl")}admin/report-tickets/${
+          reportData.reportId
+        }/assign`,
+        data,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+            "Content-Type": "application/json",
+          },
+        }
+      )
       .then((res) => {
         console.log(res);
         console.log(res.data);
+        alert("Report Ticket assigned successfully");
+        window.location.reload();
+      })
+      .catch((err) => {
+        console.log(err);
+        alert(err.response.data.message);
       });
-
-    window.location.reload();
   }
 
   const reformedData = data?.data?.map((item) => {
@@ -106,6 +97,12 @@ const Report = () => {
 
     window.location.reload();
   };
+
+  const handleEditClick = (id) => {
+    console.log("Edit Click", id);
+    navigate(`/single-report/${id}`);
+  };
+
   const columns = [
     {
       field: "_id",
@@ -178,6 +175,13 @@ const Report = () => {
       getActions: (params) => {
         return [
           <GridActionsCellItem
+            icon={<VisibilityIcon />}
+            label="Edit"
+            className="textPrimary"
+            onClick={() => handleEditClick(params.id)}
+            color="inherit"
+          />,
+          <GridActionsCellItem
             icon={<DeleteIcon />}
             label="Delete"
             onClick={() => handleDeleteClick(params)}
@@ -196,160 +200,50 @@ const Report = () => {
         color="secondary"
         type="submit"
         sx={{ mt: "1rem" }}
-        onClick={() =>
-          setAddDiscount((prev) => (prev === false ? true : false))
-        }
+        onClick={() => setAddAsignee((prev) => (prev === false ? true : false))}
       >
-        Add Report
+        Assign a Report
       </Button>
 
-      {addDiscount === true && (
+      {addAsignee === true && (
         <Box>
           <React.Fragment>
-            <h2>Create Report</h2>
+            <h2>Assign to Admin/Moderator</h2>
             <form onSubmit={handleSubmit} action={<Link to="/login" />}>
               <Stack spacing={2} direction="row" sx={{ marginBottom: 4 }}>
                 <TextField
                   type="text"
                   variant="outlined"
                   color="secondary"
-                  label="Name"
-                  onChange={(e) =>
-                    setDiscountData({ ...discountData, name: e.target.value })
-                  }
-                  value={discountData.name}
+                  label="Report Id"
                   fullWidth
+                  onChange={(e) =>
+                    setReportData({ ...reportData, reportId: e.target.value })
+                  }
+                  value={reportData.reportId}
                   required
                 />
                 <TextField
-                  type="text"
-                  variant="outlined"
-                  color="secondary"
-                  label="Description"
-                  onChange={(e) =>
-                    setDiscountData({
-                      ...discountData,
-                      description: e.target.value,
-                    })
-                  }
-                  value={discountData.description}
+                  id="outlined-select-currency"
+                  select
+                  label="Assignee Id"
+                  defaultValue={reportData.assigneeId}
                   fullWidth
-                  required
-                />
-              </Stack>
-              <TextField
-                type="text"
-                variant="outlined"
-                color="secondary"
-                label="Code"
-                onChange={(e) =>
-                  setDiscountData({ ...discountData, code: e.target.value })
-                }
-                value={discountData.code}
-                fullWidth
-                required
-                sx={{ mb: 4 }}
-              />
-              <TextField
-                type="number"
-                variant="outlined"
-                color="secondary"
-                label="Max Uses"
-                onChange={(e) =>
-                  setDiscountData({
-                    ...discountData,
-                    maxUses: parseInt(e.target.value),
-                  })
-                }
-                value={discountData.maxUses}
-                required
-                // fullWidth
-                sx={{ mb: 4, mr: 2 }}
-              />
-              <TextField
-                id="outlined-select-currency"
-                select
-                label="Type"
-                defaultValue={discountData.type}
-                sx={{ mb: 4, mr: 2 }}
-                onChange={(e) =>
-                  setDiscountData({
-                    ...discountData,
-                    type: e.target.value,
-                  })
-                }
-              >
-                {discountDataType.map((option) => (
-                  <MenuItem key={option.value} value={option.value}>
-                    {option.label}
-                  </MenuItem>
-                ))}
-              </TextField>
-              {discountData.type === "percentage" ? (
-                <TextField
-                  type="number"
-                  variant="outlined"
-                  color="secondary"
-                  label="Percentage"
-                  onChange={(e) =>
-                    setDiscountData({
-                      ...discountData,
-                      percentage: parseInt(e.target.value),
-                    })
-                  }
-                  value={discountData.percentage}
-                  required
-                  // fullWidth
                   sx={{ mb: 4, mr: 2 }}
-                />
-              ) : null}
-              {discountData.type === "amount" ? (
-                <TextField
-                  type="number"
-                  variant="outlined"
-                  color="secondary"
-                  label="Amount"
                   onChange={(e) =>
-                    setDiscountData({
-                      ...discountData,
-                      amount: parseInt(e.target.value),
+                    setReportData({
+                      ...reportData,
+                      assigneeId: e.target.value,
                     })
                   }
-                  value={discountData.amount}
-                  required
-                  // fullWidth
-                  sx={{ mb: 4 }}
-                />
-              ) : null}
-              <TextField
-                type="date"
-                variant="outlined"
-                color="secondary"
-                label="Start Date"
-                onChange={(e) =>
-                  setDiscountData({
-                    ...discountData,
-                    startDate: e.target.value,
-                  })
-                }
-                value={discountData.startDate}
-                fullWidth
-                required
-                sx={{ mb: 4 }}
-              />
-              <TextField
-                type="date"
-                variant="outlined"
-                color="secondary"
-                label="End Date"
-                onChange={(e) =>
-                  setDiscountData({ ...discountData, endDate: e.target.value })
-                }
-                value={discountData.endDate}
-                fullWidth
-                required
-                sx={{ mb: 4 }}
-              />
+                >
+                  {ASSIGNEE.map((option) => (
+                    <MenuItem key={option.label} value={option.value}>
+                      {option.label}
+                    </MenuItem>
+                  ))}
+                </TextField>
+              </Stack>
               <Button variant="outlined" color="secondary" type="submit">
                 Submit
               </Button>

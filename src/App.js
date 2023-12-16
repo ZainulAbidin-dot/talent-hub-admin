@@ -23,6 +23,7 @@ import Login from 'scenes/login';
 import TopUp from 'scenes/topUp';
 import SingleTopUp from 'scenes/singleTopUp';
 import Report from 'scenes/reports';
+import SingleReport from 'scenes/singleReport';
 import { setAuthToken } from 'state';
 
 function App() {
@@ -59,6 +60,7 @@ function App() {
                   <Route path="/top-up" element={<TopUp />} />
                   <Route path="/single-top-up/:id" element={<SingleTopUp />} />
                   <Route path="/reports" element={<Report />} />
+                  <Route path='/single-report/:id' element={<SingleReport />} />
                 </Route>
               </Route>
             </Route>

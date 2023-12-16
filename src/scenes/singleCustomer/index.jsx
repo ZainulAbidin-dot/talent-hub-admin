@@ -1,31 +1,26 @@
 import React, { useEffect, useState } from "react";
-import {
-  useGetAllDocumentsByUserIdQuery,
-  useGetSingleCustomerQuery,
-} from "state/api";
+import { useGetSingleCustomerQuery } from "state/api";
 import {
   Box,
   useTheme,
-  Button,
   Card,
   CardContent,
   Typography,
   CardMedia,
-  MenuItem,
-  Stack,
-  Menu,
 } from "@mui/material";
-import TextField from "@mui/material/TextField";
 import Header from "components/Header";
 import profileImage from "assets/profile.jpg";
 import { useParams } from "react-router-dom";
 import Dialog from "@mui/material/Dialog";
 import DialogContent from "@mui/material/DialogContent";
 import DialogTitle from "@mui/material/DialogTitle";
-import { DataGrid } from "@mui/x-data-grid";
 import axios from "axios";
 import { useSelector } from "react-redux";
-import Documents from './Documents';
+import Documents from "./Documents";
+import UserDetailsCard from "./UserDetailsCard";
+import PassengerDetailsCard from "./PassengerDetailsCard";
+import DriverDetailsCard from "./DriverDetailsCard";
+import VehicleDetailsCard from "./VehicleDetailsCard";
 
 const SingleCustomer = () => {
   const theme = useTheme();
@@ -35,10 +30,8 @@ const SingleCustomer = () => {
   const [hovered, setHovered] = useState(false);
   const [openModal, setOpenModal] = useState(false);
   const [modalImage, setModalImage] = useState("");
-  const [driverProfileStatus, setDriverProfileStatus] = useState(false);
   const [updatedDriverProfileStatus, setUpdatedDriverProfileStatus] =
     useState(null);
-  const [passengerProfileStatus, setPassengerProfileStatus] = useState(false);
   const [updatedPassengerProfileStatus, setUpdatedPassengerProfileStatus] =
     useState(null);
 
@@ -70,7 +63,9 @@ const SingleCustomer = () => {
 
   useEffect(() => {
     if (!isLoading && data != null && data !== undefined) {
+      console.log(data.data.user.data);
       setFormData({
+        id: data.data.user.data.id,
         name: data.data.user.data.fullName,
         email: data.data.user.data.email,
         phoneNumber: data.data.user.data.phoneNumber,
@@ -226,305 +221,57 @@ const SingleCustomer = () => {
               ) : null}
 
               {formData.name ? (
-                <Card
-                  variant="outlined"
-                  style={{
-                    // height: "50vh",
-                    backgroundColor: "transparent",
-                    width: "70vw",
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    margin: "0 auto",
-                  }}
-                >
-                  <CardContent>
-                    <Typography
-                      gutterBottom
-                      variant="h3"
-                      paddingTop={3}
-                      component="div"
-                    >
-                      User Details
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      NAME : {formData.name}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      CNIC : {formData.cnicNumber}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      EMAIL : {formData.email}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      ROLE : {formData.role}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      GENDER : {formData.gender}
-                    </Typography>
-
-                    {formData.passengerProfile ? (
-                      <>
-                        <Typography
-                          gutterBottom
-                          variant="h3"
-                          paddingTop={2}
-                          component="div"
-                        >
-                          Passenger Profile Details
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary">
-                          User Id: {formData.passengerProfile.id}
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary">
-                          Is Verified: {formData.passengerProfile.status}
-                        </Typography>
-
-                        <Button
-                          variant="outlined"
-                          color="secondary"
-                          type="submit"
-                          sx={{ mt: "1rem" }}
-                          onClick={() =>
-                            setPassengerProfileStatus((prev) =>
-                              prev === false ? true : false
-                            )
-                          }
-                        >
-                          Update Status
-                        </Button>
-
-                        {passengerProfileStatus === true && (
-                          <Box>
-                            <React.Fragment>
-                              <h2>Update Status</h2>
-                              <form
-                                onSubmit={(e) => handleUpdatedStatusSubmit(e)}
-                              >
-                                <Stack
-                                  spacing={2}
-                                  direction="row"
-                                  sx={{ marginBottom: 4 }}
-                                >
-                                  <TextField
-                                    id="outlined-select-currency"
-                                    select
-                                    label="Type"
-                                    defaultValue={
-                                      formData.passengerProfile.status
-                                    }
-                                    sx={{ mb: 4, mr: 2 }}
-                                    onChange={(e) =>
-                                      setUpdatedPassengerProfileStatus(
-                                        e.target.value
-                                      )
-                                    }
-                                  >
-                                    {statusType.map((option) => (
-                                      <MenuItem
-                                        key={option.value}
-                                        value={option.value}
-                                      >
-                                        {option.label}
-                                      </MenuItem>
-                                    ))}
-                                  </TextField>
-                                </Stack>
-                                <Button
-                                  variant="outlined"
-                                  color="secondary"
-                                  type="submit"
-                                >
-                                  Submit
-                                </Button>
-                              </form>
-                              <small>
-                                {/* Already have an account? <Link to="/login">Login Here</Link> */}
-                              </small>
-                            </React.Fragment>
-                          </Box>
-                        )}
-                      </>
-                    ) : null}
-
-                    {formData.driverProfile ? (
-                      <>
-                        <Typography
-                          gutterBottom
-                          variant="h3"
-                          paddingTop={3}
-                          component="div"
-                        >
-                          Driver Profile Details
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary">
-                          User Id : {formData.driverProfile.id}
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary">
-                          Is Verified : {formData.driverProfile.status}
-                        </Typography>
-
-                        <Button
-                          variant="outlined"
-                          color="secondary"
-                          type="submit"
-                          sx={{ mt: "1rem" }}
-                          onClick={() =>
-                            setDriverProfileStatus((prev) =>
-                              prev === false ? true : false
-                            )
-                          }
-                        >
-                          Update Status
-                        </Button>
-
-                        {driverProfileStatus === true && (
-                          <Box>
-                            <React.Fragment>
-                              <h2>Update Status</h2>
-                              <form
-                                onSubmit={(e) => handleUpdatedStatusSubmit(e)}
-                              >
-                                <Stack
-                                  spacing={2}
-                                  direction="row"
-                                  sx={{ marginBottom: 4 }}
-                                >
-                                  <TextField
-                                    id="outlined-select-currency"
-                                    select
-                                    label="Type"
-                                    defaultValue={formData.driverProfile.status}
-                                    sx={{ mb: 4, mr: 2 }}
-                                    onChange={(e) =>
-                                      setUpdatedDriverProfileStatus(
-                                        e.target.value
-                                      )
-                                    }
-                                  >
-                                    {statusType.map((option) => (
-                                      <MenuItem
-                                        key={option.value}
-                                        value={option.value}
-                                      >
-                                        {option.label}
-                                      </MenuItem>
-                                    ))}
-                                  </TextField>
-                                </Stack>
-                                <Button
-                                  variant="outlined"
-                                  color="secondary"
-                                  type="submit"
-                                >
-                                  Submit
-                                </Button>
-                              </form>
-                              <small>
-                                {/* Already have an account? <Link to="/login">Login Here</Link> */}
-                              </small>
-                            </React.Fragment>
-                          </Box>
-                        )}
-
-                        <Typography
-                          gutterBottom
-                          variant="h3"
-                          paddingTop={3}
-                          component="div"
-                        >
-                          Vehicles Details
-                        </Typography>
-
-                        {formData.driverProfile.vehicles
-                          ? formData.driverProfile.vehicles.map(
-                            (vehicle, index) => (
-                              <Card
-                                variant="outlined"
-                                style={{
-                                  height: "50vh",
-                                  backgroundColor: "transparent",
-                                  width: "20vw",
-                                  display: "flex",
-                                  flexDirection: "column",
-                                  alignItems: "center",
-                                  justifyContent: "center",
-                                  margin: "0 auto",
-                                }}
-                              >
-                                <Typography
-                                  gutterBottom
-                                  variant="h6"
-                                  component="div"
-                                >
-                                  Current Selected Vehicle :{" "}
-                                  {vehicle.selected ? "True" : "False"}
-                                </Typography>
-                                <Typography
-                                  variant="body2"
-                                  color="text.secondary"
-                                ></Typography>
-                                <Typography
-                                  variant="body2"
-                                  color="text.secondary"
-                                >
-                                  Color : {vehicle.color}
-                                </Typography>
-                                <Typography
-                                  variant="body2"
-                                  color="text.secondary"
-                                >
-                                  Model : {vehicle.model}
-                                </Typography>
-                                <Typography
-                                  variant="body2"
-                                  color="text.secondary"
-                                >
-                                  Year : {vehicle.year}
-                                </Typography>
-                                <Typography
-                                  variant="body2"
-                                  color="text.secondary"
-                                >
-                                  No of Seats : {vehicle.noOfSeats}
-                                </Typography>
-                                <Typography
-                                  variant="body2"
-                                  color="text.secondary"
-                                >
-                                  Engine Capacity: {vehicle.engineCapacity}
-                                </Typography>
-                                <Typography
-                                  variant="body2"
-                                  color="text.secondary"
-                                >
-                                  Is AC Available :{" "}
-                                  {vehicle.isAcAvailable ? "True" : "False"}
-                                </Typography>
-                                <Typography
-                                  variant="body2"
-                                  color="text.secondary"
-                                >
-                                  Is Trunk Available :{" "}
-                                  {vehicle.isTrunkAvailable}
-                                </Typography>
-                                <Typography
-                                  variant="body2"
-                                  color="text.secondary"
-                                >
-                                  License Plate Number :{" "}
-                                  {vehicle.licensePlateNumber}
-                                </Typography>
-                              </Card>
-                            )
-                          )
-                          : null}
-                      </>
-                    ) : null}
-                  </CardContent>
-                </Card>
+                <UserDetailsCard
+                  key={id}
+                  id={id}
+                  name={formData.name}
+                  cnicNumber={formData.cnicNumber}
+                  email={formData.email}
+                  role={formData.role}
+                  gender={formData.gender}
+                />
               ) : null}
+
+              {formData.passengerProfile ? (
+                <PassengerDetailsCard
+                  id={formData.passengerProfile.id}
+                  status={formData.passengerProfile.status}
+                  statusType={statusType}
+                  handleUpdatedStatusSubmit={handleUpdatedStatusSubmit}
+                  setUpdatedPassengerProfileStatus={
+                    setUpdatedPassengerProfileStatus
+                  }
+                />
+              ) : null}
+
+              {formData.driverProfile ? (
+                <DriverDetailsCard
+                  id={formData.driverProfile.id}
+                  status={formData.driverProfile.status}
+                  statusType={statusType}
+                  handleUpdatedStatusSubmit={handleUpdatedStatusSubmit}
+                  setUpdatedDriverProfileStatus={setUpdatedDriverProfileStatus}
+                />
+              ) : null}
+
+              {formData.driverProfile &&
+              formData.driverProfile.vehicles.length > 0
+                ? formData.driverProfile.vehicles.map((vehicle, index) => (
+                    <VehicleDetailsCard
+                      key={index}
+                      id={vehicle.id}
+                      isSelected={vehicle.selected}
+                      color={vehicle.color}
+                      model={vehicle.model}
+                      year={vehicle.year}
+                      noOfSeats={vehicle.noOfSeats}
+                      engineCapacity={vehicle.engineCapacity}
+                      isAcAvailable={vehicle.isAcAvailable}
+                      isTrunkAvailable={vehicle.isTrunkAvailable}
+                      licensePlateNumber={vehicle.licensePlateNumber}
+                    />
+                  ))
+                : null}
             </Box>
 
             <Dialog open={openModal} onClose={handleCloseModal}>
