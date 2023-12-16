@@ -96,7 +96,7 @@ const Navbar = ({ isSidebarOpen, setIsSidebarOpen }) => {
             )}
           </IconButton>
 
-          <FlexBetween>
+          {/* <FlexBetween>
             <IconButton onClick={handleClick2}>
               <SettingsOutlined sx={{ fontSize: "25px" }} />
               <Typography
@@ -134,7 +134,7 @@ const Navbar = ({ isSidebarOpen, setIsSidebarOpen }) => {
                 Production Url
               </MenuItem>
             </Menu>
-          </FlexBetween>
+          </FlexBetween> */}
 
           <FlexBetween>
             <Button
