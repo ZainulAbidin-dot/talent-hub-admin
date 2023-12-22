@@ -1,54 +1,128 @@
-import React, { useMemo } from "react";
+import React from "react";
 import { ResponsiveLine } from "@nivo/line";
 import { useTheme } from "@mui/material";
-import { useGetSalesQuery } from "state/api";
 
 const OverviewChart = ({ isDashboard = false, view }) => {
   const theme = useTheme();
-  const { data, isLoading } = useGetSalesQuery();
+  // const { data, isLoading } = useGetSalesQuery();
 
-  const [totalSalesLine, totalUnitsLine] = useMemo(() => {
-    if (!data) return [];
-
-    const { monthlyData } = data;
-    const totalSalesLine = {
-      id: "totalSales",
-      color: theme.palette.secondary.main,
-      data: [],
-    };
-    const totalUnitsLine = {
-      id: "totalUnits",
-      color: theme.palette.secondary[600],
-      data: [],
-    };
-
-    Object.values(monthlyData).reduce(
-      (acc, { month, totalSales, totalUnits }) => {
-        const curSales = acc.sales + totalSales;
-        const curUnits = acc.units + totalUnits;
-
-        totalSalesLine.data = [
-          ...totalSalesLine.data,
-          { x: month, y: curSales },
-        ];
-        totalUnitsLine.data = [
-          ...totalUnitsLine.data,
-          { x: month, y: curUnits },
-        ];
-
-        return { sales: curSales, units: curUnits };
-      },
-      { sales: 0, units: 0 }
-    );
-
-    return [[totalSalesLine], [totalUnitsLine]];
-  }, [data]); // eslint-disable-line react-hooks/exhaustive-deps
+  const isLoading = false;
+  const data = [
+    {
+      id: "Shared Express",
+      color: "hsl(10, 70%, 50%)",
+      data: [
+        {
+          x: "Jan",
+          y: 66,
+        },
+        {
+          x: "Feb",
+          y: 58,
+        },
+        {
+          x: "Mar",
+          y: 265,
+        },
+        {
+          x: "Apr",
+          y: 244,
+        },
+        {
+          x: "May",
+          y: 119,
+        },
+        {
+          x: "Jun",
+          y: 133,
+        },
+        {
+          x: "Jul",
+          y: 240,
+        },
+        {
+          x: "Aug",
+          y: 167,
+        },
+        {
+          x: "Sept",
+          y: 242,
+        },
+        {
+          x: "Oct",
+          y: 57,
+        },
+        {
+          x: "Nov",
+          y: 86,
+        },
+        {
+          x: "Dec",
+          y: 47,
+        },
+      ],
+    },
+    {
+      id: "Rapid Express",
+      color: "hsl(209, 70%, 50%)",
+      data: [
+        {
+          x: "Jan",
+          y: 176,
+        },
+        {
+          x: "Feb",
+          y: 82,
+        },
+        {
+          x: "Mar",
+          y: 12,
+        },
+        {
+          x: "Apr",
+          y: 146,
+        },
+        {
+          x: "May",
+          y: 185,
+        },
+        {
+          x: "Jun",
+          y: 277,
+        },
+        {
+          x: "Jul",
+          y: 85,
+        },
+        {
+          x: "Aug",
+          y: 16,
+        },
+        {
+          x: "Sept",
+          y: 97,
+        },
+        {
+          x: "Oct",
+          y: 68,
+        },
+        {
+          x: "Nov",
+          y: 158,
+        },
+        {
+          x: "Dec",
+          y: 249,
+        },
+      ],
+    },
+  ];
 
   if (!data || isLoading) return "Loading...";
 
   return (
     <ResponsiveLine
-      data={view === "sales" ? totalSalesLine : totalUnitsLine}
+      data={data}
       theme={{
         axis: {
           domain: {
@@ -82,7 +156,7 @@ const OverviewChart = ({ isDashboard = false, view }) => {
           },
         },
       }}
-      margin={{ top: 20, right: 50, bottom: 50, left: 70 }}
+      margin={{ top: 20, right: 120, bottom: 50, left: 70 }}
       xScale={{ type: "point" }}
       yScale={{
         type: "linear",
@@ -105,7 +179,7 @@ const OverviewChart = ({ isDashboard = false, view }) => {
         tickSize: 5,
         tickPadding: 5,
         tickRotation: 0,
-        legend: isDashboard ? "" : "Month",
+        legend: isDashboard ? "Month" : "Month",
         legendOffset: 36,
         legendPosition: "middle",
       }}
@@ -116,7 +190,7 @@ const OverviewChart = ({ isDashboard = false, view }) => {
         tickPadding: 5,
         tickRotation: 0,
         legend: isDashboard
-          ? ""
+          ? "Number of Rides"
           : `Total ${view === "sales" ? "Revenue" : "Units"} for Year`,
         legendOffset: -60,
         legendPosition: "middle",
@@ -129,36 +203,32 @@ const OverviewChart = ({ isDashboard = false, view }) => {
       pointBorderColor={{ from: "serieColor" }}
       pointLabelYOffset={-12}
       useMesh={true}
-      legends={
-        !isDashboard
-          ? [
-              {
-                anchor: "bottom-right",
-                direction: "column",
-                justify: false,
-                translateX: 30,
-                translateY: -40,
-                itemsSpacing: 0,
-                itemDirection: "left-to-right",
-                itemWidth: 80,
-                itemHeight: 20,
-                itemOpacity: 0.75,
-                symbolSize: 12,
-                symbolShape: "circle",
-                symbolBorderColor: "rgba(0, 0, 0, .5)",
-                effects: [
-                  {
-                    on: "hover",
-                    style: {
-                      itemBackground: "rgba(0, 0, 0, .03)",
-                      itemOpacity: 1,
-                    },
-                  },
-                ],
+      legends={[
+        {
+          anchor: "bottom-right",
+          direction: "column",
+          justify: false,
+          translateX: 90,
+          translateY: -40,
+          itemsSpacing: 0,
+          itemDirection: "left-to-right",
+          itemWidth: 80,
+          itemHeight: 20,
+          itemOpacity: 0.75,
+          symbolSize: 12,
+          symbolShape: "circle",
+          symbolBorderColor: "rgba(0, 0, 0, .5)",
+          effects: [
+            {
+              on: "hover",
+              style: {
+                itemBackground: "rgba(0, 0, 0, .03)",
+                itemOpacity: 1,
               },
-            ]
-          : undefined
-      }
+            },
+          ],
+        },
+      ]}
     />
   );
 };

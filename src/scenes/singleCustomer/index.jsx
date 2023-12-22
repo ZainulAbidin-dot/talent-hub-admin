@@ -25,7 +25,7 @@ import VehicleDetailsCard from "./VehicleDetailsCard";
 const SingleCustomer = () => {
   const theme = useTheme();
   const { id } = useParams();
-  const { data, isLoading } = useGetSingleCustomerQuery(id);
+  const { data, isLoading, refetch } = useGetSingleCustomerQuery(id);
   const [formData, setFormData] = useState(null);
   const [hovered, setHovered] = useState(false);
   const [openModal, setOpenModal] = useState(false);
@@ -34,6 +34,10 @@ const SingleCustomer = () => {
     useState(null);
   const [updatedPassengerProfileStatus, setUpdatedPassengerProfileStatus] =
     useState(null);
+  const [updatedVehicleStatus, setUpdatedVehicleStatus] = useState({
+    id: null,
+    status: null,
+  });
 
   const statusType = [
     {
@@ -51,15 +55,6 @@ const SingleCustomer = () => {
   ];
 
   const accessToken = useSelector((state) => state.global.authToken);
-
-  const [anchorEl, setAnchorEl] = React.useState(null);
-  const open = Boolean(anchorEl);
-  const handleClick = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-  const handleClose = () => {
-    setAnchorEl(null);
-  };
 
   useEffect(() => {
     if (!isLoading && data != null && data !== undefined) {
@@ -85,7 +80,11 @@ const SingleCustomer = () => {
 
   const handleUpdatedStatusSubmit = async (e) => {
     e.preventDefault();
-    console.log(updatedDriverProfileStatus, updatedPassengerProfileStatus);
+    console.log(
+      updatedDriverProfileStatus,
+      updatedPassengerProfileStatus,
+      updatedVehicleStatus
+    );
 
     if (updatedDriverProfileStatus != null) {
       try {
@@ -104,6 +103,7 @@ const SingleCustomer = () => {
         );
         console.log(response);
         alert(response.data.message);
+        refetch();
       } catch (error) {
         console.log(error);
         console.log(error.message);
@@ -127,13 +127,42 @@ const SingleCustomer = () => {
         );
         console.log(response);
         alert(response.data.message);
+        refetch();
       } catch (error) {
         console.log(error);
         console.log(error.message);
       }
     }
 
-    window.location.reload();
+    if (
+      updatedVehicleStatus.id != null &&
+      updatedVehicleStatus.status != null
+    ) {
+      try {
+        const response = await axios.patch(
+          `${localStorage.getItem("baseUrl")}admin/vehicles/${
+            updatedVehicleStatus.id
+          }`,
+          {
+            status: updatedVehicleStatus.status,
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
+        console.log(response);
+        alert(response.data.message);
+        refetch();
+      } catch (error) {
+        console.log(error);
+        console.log(error.message);
+      }
+    }
+
+    // window.location.reload();
   };
 
   return (
@@ -269,6 +298,9 @@ const SingleCustomer = () => {
                       isAcAvailable={vehicle.isAcAvailable}
                       isTrunkAvailable={vehicle.isTrunkAvailable}
                       licensePlateNumber={vehicle.licensePlateNumber}
+                      status={vehicle.status}
+                      handleUpdatedStatusSubmit={handleUpdatedStatusSubmit}
+                      setUpdatedVehicleStatus={setUpdatedVehicleStatus}
                     />
                   ))
                 : null}

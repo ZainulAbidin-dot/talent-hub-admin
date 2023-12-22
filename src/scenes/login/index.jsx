@@ -100,6 +100,7 @@ export default function Login() {
         fcmToken: "qwdf",
       })
       .then((res) => {
+        console.log(res, res.data);
         if (res.data?.data?.token) {
           dispatch(setUserId(res.data.data.user.id));
           dispatch(setAuthToken(res.data.data.token));

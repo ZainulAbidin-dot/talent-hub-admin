@@ -1,18 +1,56 @@
-import React from "react";
+import React, { useState } from "react";
 import { ResponsivePie } from "@nivo/pie";
 import { Box, Typography, useTheme } from "@mui/material";
-import { useGetSalesQuery } from "state/api";
+import { useGetRapidRidesQuery, useGetSharedRidesQuery } from "state/api";
 
 const BreakdownChart = ({ isDashboard = false }) => {
-  const data = {
-    totalSales: 7000,
-    salesByCategory: {
-      "Shared Express": 4000,
-      "Rapid Express": 3000,
-    },
-  };
   const isLoading = false;
   // const { data, isLoading } = useGetSalesQuery();
+
+  const [page, setPage] = useState(0);
+  const [pageSize, setPageSize] = useState(20);
+  const [sort, setSort] = useState({});
+  const [search, setSearch] = useState("");
+
+  const { data: rapidRides, isLoading: isLoadingRapidRides } =
+    useGetRapidRidesQuery({
+      page,
+      pageSize,
+      sort: JSON.stringify(sort),
+      search,
+    });
+  const { data: sharedRides, isLoading: isLoadingSharedRides } =
+    useGetSharedRidesQuery({
+      page,
+      pageSize,
+      sort: JSON.stringify(sort),
+      search,
+    });
+
+  let totalRapidRidesFare = 0;
+  rapidRides?.data?.rides.map((ride) => {
+    if (ride.status === "closed") {
+      totalRapidRidesFare = totalRapidRidesFare + ride.fare;
+    }
+    return 0;
+  });
+
+  let totalSharedRidesFare = 0;
+  sharedRides?.data?.rides.map((ride) => {
+    if (ride.status === "closed") {
+      totalSharedRidesFare = totalSharedRidesFare + ride.fare;
+    }
+    return 0;
+  });
+
+  const data = {
+    totalSales: totalSharedRidesFare + totalRapidRidesFare,
+    salesByCategory: {
+      "Shared Express": totalSharedRidesFare,
+      "Rapid Express": totalRapidRidesFare,
+    },
+  };
+
   const theme = useTheme();
 
   if (!data || isLoading) return "Loading...";

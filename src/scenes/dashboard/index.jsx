@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import FlexBetween from "components/FlexBetween";
 import Header from "components/Header";
 import {
@@ -7,6 +7,8 @@ import {
   PointOfSale,
   PersonAdd,
   Traffic,
+  AdminPanelSettingsOutlined,
+  TrendingUpOutlined,
 } from "@mui/icons-material";
 import {
   Box,
@@ -14,11 +16,18 @@ import {
   Typography,
   useTheme,
   useMediaQuery,
+  Avatar,
 } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import BreakdownChart from "components/BreakdownChart";
 import OverviewChart from "components/OverviewChart";
-import { useGetDashboardQuery } from "state/api";
+import {
+  useGetCustomersQuery,
+  useGetDashboardQuery,
+  useGetRapidRidesQuery,
+  useGetReportsQuery,
+  useGetSharedRidesQuery,
+} from "state/api";
 import StatBox from "components/StatBox";
 
 const Dashboard = () => {
@@ -26,36 +35,91 @@ const Dashboard = () => {
   const isNonMediumScreens = useMediaQuery("(min-width: 1200px)");
   const { data, isLoading } = useGetDashboardQuery();
 
+  const [page, setPage] = useState(0);
+  const [pageSize, setPageSize] = useState(20);
+  const [sort, setSort] = useState({});
+  const [search, setSearch] = useState("");
+
+  const { data: rapidRides, isLoading: isLoadingRapidRides } =
+    useGetRapidRidesQuery({
+      page,
+      pageSize,
+      sort: JSON.stringify(sort),
+      search,
+    });
+  const { data: sharedRides, isLoading: isLoadingSharedRides } =
+    useGetSharedRidesQuery({
+      page,
+      pageSize,
+      sort: JSON.stringify(sort),
+      search,
+    });
+
+  const { data: customers, isLoading: isLoadingCustomers } =
+    useGetCustomersQuery("passenger");
+
+  const { data: reports, isLoading: isLoadingReports } = useGetReportsQuery();
+
   const columns = [
+    {
+      field: "profilePic",
+      headerName: "Profile Pic",
+      flex: 0.4,
+      renderCell: (params) => {
+        return (
+          <>
+            <Avatar src={params.value} />
+          </>
+        );
+      },
+    },
     {
       field: "_id",
       headerName: "ID",
       flex: 1,
+      editable: true,
     },
     {
-      field: "userId",
-      headerName: "User ID",
-      flex: 1,
-    },
-    {
-      field: "createdAt",
-      headerName: "CreatedAt",
-      flex: 1,
-    },
-    {
-      field: "products",
-      headerName: "# of Products",
+      field: "fullName",
+      headerName: "Name",
       flex: 0.5,
-      sortable: false,
-      renderCell: (params) => params.value.length,
     },
     {
-      field: "cost",
-      headerName: "Cost",
-      flex: 1,
-      renderCell: (params) => `$${Number(params.value).toFixed(2)}`,
+      field: "phoneNumber",
+      headerName: "Phone Number",
+      flex: 0.5,
+      renderCell: (params) => {
+        return params.value.replace(/^(\d{3})(\d{3})(\d{4})/, "($1)$2-$3");
+      },
     },
   ];
+
+  let customersData =
+    customers?.data?.users?.map((element) => ({
+      ...element,
+      _id: element.id,
+    })) || [];
+
+  const totalCustomers = customers?.data?.users.length || 0;
+  const totalRapidRides = rapidRides?.data?.rides.length || 0;
+  const totalSharedRides = sharedRides?.data?.rides.length || 0;
+  const totalReports = reports?.data?.length || 0;
+
+  let totalRapidRidesFare = 0;
+  rapidRides?.data?.rides.map((ride) => {
+    if (ride.status === "closed") {
+      totalRapidRidesFare = totalRapidRidesFare + ride.fare;
+    }
+    return 0;
+  });
+
+  let totalSharedRidesFare = 0;
+  sharedRides?.data?.rides.map((ride) => {
+    if (ride.status === "closed") {
+      totalSharedRidesFare = totalSharedRidesFare + ride.fare;
+    }
+    return 0;
+  });
 
   return (
     <Box m="1.5rem 2.5rem">
@@ -91,22 +155,22 @@ const Dashboard = () => {
         {/* ROW 1 */}
         <StatBox
           title="Total Customers"
-          value={data && data.totalCustomers}
+          value={customers && totalCustomers}
           increase="+14%"
           description="Since last month"
           icon={
-            <Email
+            <PersonAdd
               sx={{ color: theme.palette.secondary[300], fontSize: "26px" }}
             />
           }
         />
         <StatBox
-          title="Sales Today"
-          value={data && data.todayStats.totalSales}
+          title="Total Reports"
+          value={reports && totalReports}
           increase="+21%"
           description="Since last month"
           icon={
-            <PointOfSale
+            <Email
               sx={{ color: theme.palette.secondary[300], fontSize: "26px" }}
             />
           }
@@ -120,29 +184,30 @@ const Dashboard = () => {
         >
           <OverviewChart view="sales" isDashboard={true} />
         </Box>
+
         <StatBox
-          title="Monthly Sales"
-          value={data && data.thisMonthStats.totalSales}
-          increase="+5%"
-          description="Since last month"
-          icon={
-            <PersonAdd
-              sx={{ color: theme.palette.secondary[300], fontSize: "26px" }}
-            />
-          }
-        />
-        <StatBox
-          title="Yearly Sales"
-          value={data && data.yearlySalesTotal}
+          title="Total Shared Rides"
+          value={sharedRides && totalSharedRides}
           increase="+43%"
           description="Since last month"
           icon={
-            <Traffic
+            <AdminPanelSettingsOutlined
               sx={{ color: theme.palette.secondary[300], fontSize: "26px" }}
             />
           }
         />
 
+        <StatBox
+          title="Total Rapid Rides"
+          value={rapidRides && totalRapidRides}
+          increase="+5%"
+          description="Since last month"
+          icon={
+            <TrendingUpOutlined
+              sx={{ color: theme.palette.secondary[300], fontSize: "26px" }}
+            />
+          }
+        />
         {/* ROW 2 */}
         <Box
           gridColumn="span 8"
@@ -174,9 +239,13 @@ const Dashboard = () => {
           }}
         >
           <DataGrid
-            loading={isLoading || !data}
+            loading={
+              isLoadingCustomers ||
+              customersData === undefined ||
+              customersData.length === 0
+            }
             getRowId={(row) => row._id}
-            rows={(data && data.transactions) || []}
+            rows={customersData || []}
             columns={columns}
           />
         </Box>
@@ -188,16 +257,20 @@ const Dashboard = () => {
           borderRadius="0.55rem"
         >
           <Typography variant="h6" sx={{ color: theme.palette.secondary[100] }}>
-            Sales By Category
+            Sales Overview
           </Typography>
-          <BreakdownChart isDashboard={true} />
+          <BreakdownChart
+            totalRapidRidesFare={totalRapidRidesFare}
+            totalSharedRidesFare={totalSharedRidesFare}
+            isDashboard={true}
+          />
           <Typography
             p="0 0.6rem"
             fontSize="0.8rem"
             sx={{ color: theme.palette.secondary[200] }}
           >
-            Breakdown of real states and information via category for revenue
-            made for this year and total sales.
+            Breakdown of rides sales and information via Ride Type for revenue
+            made in total.
           </Typography>
         </Box>
       </Box>
