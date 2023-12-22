@@ -20,7 +20,7 @@ const Discount = () => {
   const [search, setSearch] = useState("");
 
   const [searchInput, setSearchInput] = useState("");
-  const { data, isLoading } = useGetDiscountQuery();
+  const { data, isLoading, refetch } = useGetDiscountQuery();
 
   const [addDiscount, setAddDiscount] = useState(false);
 
@@ -70,9 +70,26 @@ const Discount = () => {
       .then((res) => {
         console.log(res);
         console.log(res.data);
+        alert("Discount code added successfully");
+        setDiscountData({
+          name: "",
+          description: "",
+          code: "",
+          type: "percentage",
+          maxUses: 0,
+          percentage: 0,
+          amount: 0,
+          startDate: Date.now(),
+          endDate: Date.now(),
+        });
+        refetch();
+      })
+      .catch((err) => {
+        console.log(err);
+        alert(err?.response?.data?.message);
       });
 
-    window.location.reload();
+    // window.location.reload();
   }
 
   const reformedData = data?.data?.map((item) => {

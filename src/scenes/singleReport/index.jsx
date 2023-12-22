@@ -1,4 +1,4 @@
-import { Box, Button, Card, Stack, TextField } from "@mui/material";
+import { Box, Button, Card, MenuItem, Stack, TextField } from "@mui/material";
 import Header from "components/Header";
 import React, { useState } from "react";
 import { Link, useParams } from "react-router-dom";
@@ -8,13 +8,19 @@ import { useTheme } from "@emotion/react";
 import DetailsCard from "./DetailsCard";
 import CommentsCard from "./CommentsCard";
 import axios from "axios";
+import { REPORT_PRIORITY, REPORT_STATUS } from "./config";
 
 const SingleReport = () => {
   const { id } = useParams();
-  const { data, isLoading } = useGetSingleReportQuery(id);
+  const { data, isLoading, refetch } = useGetSingleReportQuery(id);
   const theme = useTheme();
 
   const [addComment, setAddComment] = useState(false);
+  const [addStatus, setAddStatus] = useState(false);
+  const [updateStatus, setUpdateStatus] = useState({
+    status: "inProgress",
+    priority: "low",
+  });
 
   const [commentData, setCommentData] = useState("");
 
@@ -22,7 +28,7 @@ const SingleReport = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log(commentData);
+    console.log(id, commentData);
 
     await axios
       .post(
@@ -39,7 +45,36 @@ const SingleReport = () => {
         console.log(res);
         console.log(res?.data);
         alert("Comment added successfully");
-        window.location.reload();
+        refetch();
+        // window.location.reload();
+      })
+      .catch((err) => {
+        console.log(err);
+        alert(err?.response?.data?.message);
+      });
+  };
+
+  const handleUpdateStatusSubmit = async (e) => {
+    e.preventDefault();
+    console.log(id, updateStatus);
+
+    await axios
+      .patch(
+        `${localStorage.getItem("baseUrl")}admin/report-tickets/${id}`,
+        { status: updateStatus.status, priority: updateStatus.priority },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+            "Content-Type": "application/json",
+          },
+        }
+      )
+      .then((res) => {
+        console.log(res);
+        console.log(res?.data);
+        alert("Comment added successfully");
+        refetch();
+        // window.location.reload();
       })
       .catch((err) => {
         console.log(err);
@@ -60,6 +95,16 @@ const SingleReport = () => {
         Add Comment
       </Button>
 
+      <Button
+        variant="outlined"
+        color="secondary"
+        type="submit"
+        sx={{ mt: "1rem" }}
+        onClick={() => setAddStatus((prev) => (prev === false ? true : false))}
+      >
+        Update Comment
+      </Button>
+
       {addComment === true && (
         <Box>
           <React.Fragment>
@@ -76,6 +121,68 @@ const SingleReport = () => {
                   value={commentData}
                   required
                 />
+              </Stack>
+              <Button variant="outlined" color="secondary" type="submit">
+                Submit
+              </Button>
+            </form>
+          </React.Fragment>
+        </Box>
+      )}
+
+      {addStatus === true && (
+        <Box>
+          <React.Fragment>
+            <h2>Update Report Status</h2>
+            <form onSubmit={(e) => handleUpdateStatusSubmit(e)}>
+              <Stack spacing={2} direction="row" sx={{ marginBottom: 4 }}>
+                <TextField
+                  id="outlined-select-currency"
+                  select
+                  label="Type"
+                  defaultValue={
+                    updateStatus.status != null
+                      ? updateStatus.status
+                      : "inProgress"
+                  }
+                  sx={{ mb: 4, mr: 2 }}
+                  onChange={(e) =>
+                    setUpdateStatus({
+                      status: e.target.value,
+                      priority: updateStatus.priority,
+                    })
+                  }
+                >
+                  {REPORT_STATUS.map((option) => (
+                    <MenuItem key={option} value={option}>
+                      {option}
+                    </MenuItem>
+                  ))}
+                </TextField>
+
+                <TextField
+                  id="outlined-select-currency"
+                  select
+                  label="Type"
+                  defaultValue={
+                    updateStatus.priority != null
+                      ? updateStatus.priority
+                      : "low"
+                  }
+                  sx={{ mb: 4, mr: 2 }}
+                  onChange={(e) =>
+                    setUpdateStatus({
+                      status: updateStatus.status,
+                      priority: e.target.value,
+                    })
+                  }
+                >
+                  {REPORT_PRIORITY.map((option) => (
+                    <MenuItem key={option} value={option}>
+                      {option}
+                    </MenuItem>
+                  ))}
+                </TextField>
               </Stack>
               <Button variant="outlined" color="secondary" type="submit">
                 Submit

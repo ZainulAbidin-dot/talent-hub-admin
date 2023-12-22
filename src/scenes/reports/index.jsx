@@ -22,7 +22,7 @@ const Report = () => {
   const [search, setSearch] = useState("");
   const navigate = useNavigate();
   const [searchInput, setSearchInput] = useState("");
-  const { data, isLoading } = useGetReportsQuery();
+  const { data, isLoading, refetch } = useGetReportsQuery();
 
   const [addAsignee, setAddAsignee] = useState(false);
 
@@ -58,7 +58,9 @@ const Report = () => {
         console.log(res);
         console.log(res.data);
         alert("Report Ticket assigned successfully");
-        window.location.reload();
+        setReportData({ reportId: "", assigneeId: "admin" });
+        refetch();
+        // window.location.reload();
       })
       .catch((err) => {
         console.log(err);
