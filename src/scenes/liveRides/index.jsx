@@ -5,6 +5,7 @@ import { Map, InfoWindow, Marker, GoogleApiWrapper } from "google-maps-react";
 import { useGetLiveRidesQuery } from "state/api";
 import { useNavigate } from "react-router-dom";
 import ReactDOM from "react-dom";
+import carImage from "assets/google-marker-car-image.png";
 
 const LiveRides = (props) => {
   const { data, isLoading } = useGetLiveRidesQuery();
@@ -97,6 +98,14 @@ const LiveRides = (props) => {
     ReactDOM.render(React.Children.only(html), document.getElementById("iwd"));
   };
 
+  let iconMarker = new window.google.maps.MarkerImage(
+    carImage,
+    null /* size is determined at runtime */,
+    null /* origin is 0,0 */,
+    null /* anchor is bottom center of the scaled image */,
+    new window.google.maps.Size(64, 64)
+  );
+
   return !isLoading ? (
     <Box m="1.5rem 2.5rem">
       <Header
@@ -132,9 +141,16 @@ const LiveRides = (props) => {
                 }
                 key={item.rideId}
                 name={item.name}
+                icon={{
+                  url: "/assets/profile.jpg",
+                  origin: new window.google.maps.Point(0, 0),
+                  anchor: new window.google.maps.Point(15, 15),
+                  scaledSize: new window.google.maps.Size(30, 30),
+                }}
                 position={{ lat: item.lat, lng: item.lng }} // Specify marker position
               />
             ))}
+
           <InfoWindow
             onClose={onInfoWindowClose}
             marker={mapState.activeMarker}

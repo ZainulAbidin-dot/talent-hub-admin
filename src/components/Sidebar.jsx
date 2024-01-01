@@ -201,7 +201,7 @@ const Sidebar = ({
               </FlexBetween>
             </Box>
             <List>
-              {role !== "admin"
+              {role === "admin"
                 ? navItems.map(({ text, icon }) => {
                     if (!icon) {
                       return (

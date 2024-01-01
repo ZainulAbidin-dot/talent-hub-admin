@@ -153,7 +153,7 @@ const RapidRides = () => {
 
   const handleEditClick = (id) => {
     navigate(`/single-ride/${id}`, {
-      state: { rideId: id, rideType: "sharedExpress" },
+      state: { rideId: id, rideType: "rapidExpress" },
     });
   };
 
