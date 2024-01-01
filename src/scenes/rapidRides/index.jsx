@@ -6,6 +6,8 @@ import Header from "components/Header";
 import DataGridCustomToolbar from "components/DataGridCustomToolbar";
 import { useNavigate } from "react-router-dom";
 import VisibilityIcon from "@mui/icons-material/Visibility";
+import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/DeleteOutlined";
 
 const RapidRides = () => {
   const theme = useTheme();
@@ -123,7 +125,39 @@ const RapidRides = () => {
         ];
       },
     },
+    {
+      field: "editaActions",
+      type: "actions",
+      headerName: "Actions",
+      width: 100,
+      cellClassName: "actions",
+      getActions: ({ id }) => {
+        return [
+          <GridActionsCellItem
+            icon={<EditIcon />}
+            label="Edit"
+            className="textPrimary"
+            onClick={() => handleEditClick(id)}
+            color="inherit"
+          />,
+          <GridActionsCellItem
+            icon={<DeleteIcon />}
+            label="Delete"
+            onClick={() => handleDeleteClick(id)}
+            color="inherit"
+          />,
+        ];
+      },
+    },
   ];
+
+  const handleEditClick = (id) => {
+    navigate(`/single-ride/${id}`, {
+      state: { rideId: id, rideType: "sharedExpress" },
+    });
+  };
+
+  const handleDeleteClick = () => {};
 
   return (
     <Box m="1.5rem 2.5rem">

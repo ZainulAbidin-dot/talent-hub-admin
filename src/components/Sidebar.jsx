@@ -19,9 +19,6 @@ import {
   Groups2Outlined,
   ReceiptLongOutlined,
   PublicOutlined,
-  PointOfSaleOutlined,
-  TodayOutlined,
-  CalendarMonthOutlined,
   AdminPanelSettingsOutlined,
   TrendingUpOutlined,
   PieChartOutlined,
@@ -111,6 +108,48 @@ const navItems = [
   },
 ];
 
+const navItemsForModerators = [
+  {
+    text: "Dashboard",
+    icon: <HomeOutlined />,
+  },
+  {
+    text: "Client Facing",
+    icon: null,
+  },
+  {
+    text: "Drivers",
+    icon: <Groups2Outlined />,
+  },
+  {
+    text: "Passengers",
+    icon: <Groups2Outlined />,
+  },
+  {
+    text: "Rides",
+    icon: null,
+  },
+  {
+    text: "Shared-Rides",
+    icon: <AdminPanelSettingsOutlined />,
+  },
+  {
+    text: "Rapid-Rides",
+    icon: <TrendingUpOutlined />,
+  },
+  {
+    text: "Live-Rides",
+    icon: <PublicOutlined />,
+  },
+  {
+    text: "Management",
+    icon: null,
+  },
+  {
+    text: "Reports",
+    icon: <ReceiptLongOutlined />,
+  },
+];
 const Sidebar = ({
   drawerWidth,
   isSidebarOpen,
@@ -121,6 +160,7 @@ const Sidebar = ({
   const [active, setActive] = useState("");
   const navigate = useNavigate();
   const theme = useTheme();
+  const role = localStorage.getItem("roles");
 
   useEffect(() => {
     setActive(pathname.substring(1));
@@ -161,53 +201,107 @@ const Sidebar = ({
               </FlexBetween>
             </Box>
             <List>
-              {navItems.map(({ text, icon }) => {
-                if (!icon) {
-                  return (
-                    <Typography key={text} sx={{ m: "2.25rem 0 1rem 3rem" }}>
-                      {text}
-                    </Typography>
-                  );
-                }
-                const lcText = text.toLowerCase();
+              {role !== "admin"
+                ? navItems.map(({ text, icon }) => {
+                    if (!icon) {
+                      return (
+                        <Typography
+                          key={text}
+                          sx={{ m: "2.25rem 0 1rem 3rem" }}
+                        >
+                          {text}
+                        </Typography>
+                      );
+                    }
+                    const lcText = text.toLowerCase();
 
-                return (
-                  <ListItem key={text} disablePadding>
-                    <ListItemButton
-                      onClick={() => {
-                        navigate(`/${lcText}`);
-                        setActive(lcText);
-                      }}
-                      sx={{
-                        backgroundColor:
-                          active === lcText
-                            ? theme.palette.secondary[300]
-                            : "transparent",
-                        color:
-                          active === lcText
-                            ? theme.palette.primary[600]
-                            : theme.palette.secondary[100],
-                      }}
-                    >
-                      <ListItemIcon
-                        sx={{
-                          ml: "2rem",
-                          color:
-                            active === lcText
-                              ? theme.palette.primary[600]
-                              : theme.palette.secondary[200],
-                        }}
-                      >
-                        {icon}
-                      </ListItemIcon>
-                      <ListItemText primary={text} />
-                      {active === lcText && (
-                        <ChevronRightOutlined sx={{ ml: "auto" }} />
-                      )}
-                    </ListItemButton>
-                  </ListItem>
-                );
-              })}
+                    return (
+                      <ListItem key={text} disablePadding>
+                        <ListItemButton
+                          onClick={() => {
+                            navigate(`/${lcText}`);
+                            setActive(lcText);
+                          }}
+                          sx={{
+                            backgroundColor:
+                              active === lcText
+                                ? theme.palette.secondary[300]
+                                : "transparent",
+                            color:
+                              active === lcText
+                                ? theme.palette.primary[600]
+                                : theme.palette.secondary[100],
+                          }}
+                        >
+                          <ListItemIcon
+                            sx={{
+                              ml: "2rem",
+                              color:
+                                active === lcText
+                                  ? theme.palette.primary[600]
+                                  : theme.palette.secondary[200],
+                            }}
+                          >
+                            {icon}
+                          </ListItemIcon>
+                          <ListItemText primary={text} />
+                          {active === lcText && (
+                            <ChevronRightOutlined sx={{ ml: "auto" }} />
+                          )}
+                        </ListItemButton>
+                      </ListItem>
+                    );
+                  })
+                : navItemsForModerators.map(({ text, icon }) => {
+                    if (!icon) {
+                      return (
+                        <Typography
+                          key={text}
+                          sx={{ m: "2.25rem 0 1rem 3rem" }}
+                        >
+                          {text}
+                        </Typography>
+                      );
+                    }
+                    const lcText = text.toLowerCase();
+
+                    return (
+                      <ListItem key={text} disablePadding>
+                        <ListItemButton
+                          onClick={() => {
+                            navigate(`/${lcText}`);
+                            setActive(lcText);
+                          }}
+                          sx={{
+                            backgroundColor:
+                              active === lcText
+                                ? theme.palette.secondary[300]
+                                : "transparent",
+                            color:
+                              active === lcText
+                                ? theme.palette.primary[600]
+                                : theme.palette.secondary[100],
+                          }}
+                        >
+                          <ListItemIcon
+                            sx={{
+                              ml: "2rem",
+                              color:
+                                active === lcText
+                                  ? theme.palette.primary[600]
+                                  : theme.palette.secondary[200],
+                            }}
+                          >
+                            {icon}
+                          </ListItemIcon>
+                          <ListItemText primary={text} />
+                          {active === lcText && (
+                            <ChevronRightOutlined sx={{ ml: "auto" }} />
+                          )}
+                        </ListItemButton>
+                      </ListItem>
+                    );
+                  })}
             </List>
           </Box>
         </Drawer>
