@@ -1,24 +1,30 @@
 import React, { useState } from "react";
 import { Box, useTheme } from "@mui/material";
-import { useGetTopUpQuery } from "state/api";
+import { useDeleteTestMutation, useGetTestsQuery } from "state/api";
 import Header from "components/Header";
 import { DataGrid } from "@mui/x-data-grid";
-import VisibilityIcon from "@mui/icons-material/Visibility";
+import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/DeleteOutlined";
 import SaveIcon from "@mui/icons-material/Save";
 import CancelIcon from "@mui/icons-material/Close";
 import { GridRowModes, GridActionsCellItem } from "@mui/x-data-grid";
+import { useDispatch } from "react-redux";
+import { setCustomerId } from "state";
 import { useNavigate } from "react-router-dom";
+import Avatar from "@mui/material/Avatar";
 import DataGridCustomToolbar from "components/DataGridCustomToolbar";
+import { VisibilityOutlined } from "@mui/icons-material";
 
-const TopUp = () => {
+const Tests = () => {
+  const dispatch = useDispatch();
   const navigate = useNavigate();
   const theme = useTheme();
   const [search, setSearch] = useState("");
   const [searchInput, setSearchInput] = useState("");
 
-  const { data, isLoading } = useGetTopUpQuery();
+  const { data, isLoading } = useGetTestsQuery();
+  const [deleteTest] = useDeleteTestMutation();
 
-  console.log(data);
   const columns = [
     {
       field: "_id",
@@ -27,18 +33,28 @@ const TopUp = () => {
       editable: true,
     },
     {
-      field: "status",
-      headerName: "Status",
-      flex: 0.5,
+      field: "title",
+      headerName: "Title",
+      flex: 1,
     },
     {
-      field: "amount",
-      headerName: "Amount",
-      flex: 0.5,
+      field: "companyId",
+      headerName: "Company Id",
+      flex: 1,
     },
     {
-      field: "remarks",
-      headerName: "Image Remarks",
+      field: "skills",
+      headerName: "Skills",
+      flex: 1,
+    },
+    {
+      field: "startedAt",
+      headerName: "Starting Time",
+      flex: 1,
+    },
+    {
+      field: "endedAt",
+      headerName: "Ending Time",
       flex: 1,
     },
     {
@@ -47,8 +63,9 @@ const TopUp = () => {
       headerName: "Actions",
       width: 100,
       cellClassName: "actions",
-      getActions: ({ id }) => {
-        const isInEditMode = modifiedData[id]?.mode === GridRowModes.Edit;
+      getActions: (params) => {
+        const isInEditMode =
+          modifiedData[params.row.id]?.mode === GridRowModes.Edit;
 
         if (isInEditMode) {
           return [
@@ -58,13 +75,13 @@ const TopUp = () => {
               sx={{
                 color: "primary.main",
               }}
-              onClick={() => handleSaveClick(id)}
+              onClick={() => handleSaveClick(params.row.id)}
             />,
             <GridActionsCellItem
               icon={<CancelIcon />}
               label="Cancel"
               className="textPrimary"
-              onClick={() => handleCancelClick(id)}
+              onClick={() => handleCancelClick(params.row.id)}
               color="inherit"
             />,
           ];
@@ -72,10 +89,16 @@ const TopUp = () => {
 
         return [
           <GridActionsCellItem
-            icon={<VisibilityIcon />}
+            icon={<VisibilityOutlined />}
             label="Edit"
             className="textPrimary"
-            onClick={() => handleEditClick(id)}
+            onClick={() => handleEditClick(params.row.id, params.row.role)}
+            color="inherit"
+          />,
+          <GridActionsCellItem
+            icon={<DeleteIcon />}
+            label="Delete"
+            onClick={() => handleDeleteClick(params.row.id)}
             color="inherit"
           />,
         ];
@@ -83,34 +106,42 @@ const TopUp = () => {
     },
   ];
 
-  const handleSaveClick = () => {
-    console.log("Save Click");
+  const handleSaveClick = () => {};
+
+  const handleEditClick = (id, role) => {
+    console.log(role, id);
+    dispatch(setCustomerId(id));
+    navigate(`/single-test/${id}`, { state: { test: id } });
   };
 
-  const handleEditClick = (id) => {
-    console.log("Edit Click", id);
-    navigate(`/single-top-up/${id}`, { state: { topUpId: id } });
-  };
+  const handleCancelClick = () => {};
 
-  const handleCancelClick = () => {
-    console.log("Cancel Click");
-  };
-
-  const handleDeleteClick = () => {
-    console.log("Delete Click");
+  const handleDeleteClick = (targetTestId) => {
+    deleteTest(targetTestId)
+      .then((res) => {
+        if (res.error) {
+          alert(res.error.data.message);
+        }
+        if (res.data === null) {
+          alert("Test Deleted Successfully");
+          window.location.reload();
+        }
+      })
+      .catch((err) => {
+        console.log("Error while deleting a Test");
+      });
   };
 
   let modifiedData =
-    data?.data?.topups?.map((element) => ({
+    data?.data?.map((element) => ({
       ...element,
-      remarks: element?.image?.remarks,
-      amount: element.amount == null ? "N/A" : `Rs. ${element.amount}`,
       _id: element.id,
+      skills: element.skills.join(", "),
     })) || [];
 
   return (
     <Box m="1.5rem 2.5rem">
-      <Header title="Top Up" subtitle={"List of Top-Ups"} />
+      <Header title="Jobs" subtitle={"List of Jobs"} />
       <Box
         mt="40px"
         height="75vh"
@@ -154,4 +185,4 @@ const TopUp = () => {
   );
 };
 
-export default TopUp;
+export default Tests;

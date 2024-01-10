@@ -9,7 +9,7 @@ const OverviewChart = ({ isDashboard = false, view }) => {
   const isLoading = false;
   const data = [
     {
-      id: "Shared Express",
+      id: "Jobseekers",
       color: "hsl(10, 70%, 50%)",
       data: [
         {
@@ -63,7 +63,7 @@ const OverviewChart = ({ isDashboard = false, view }) => {
       ],
     },
     {
-      id: "Rapid Express",
+      id: "Companies",
       color: "hsl(209, 70%, 50%)",
       data: [
         {
@@ -190,7 +190,7 @@ const OverviewChart = ({ isDashboard = false, view }) => {
         tickPadding: 5,
         tickRotation: 0,
         legend: isDashboard
-          ? "Number of Rides"
+          ? "Number of People Registered"
           : `Total ${view === "sales" ? "Revenue" : "Units"} for Year`,
         legendOffset: -60,
         legendPosition: "middle",

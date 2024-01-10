@@ -2,7 +2,16 @@ import { useTheme } from "@emotion/react";
 import { Card, CardContent, Typography } from "@mui/material";
 import React, { useState } from "react";
 
-const UserCard = ({ id, title, fullName, phoneNumber }) => {
+const UserCard = ({
+  id,
+  title,
+  jobseekerId,
+  testId,
+  score,
+  status,
+  startedAt,
+  completedAt,
+}) => {
   const theme = useTheme();
   const [isExpanded, setIsExpanded] = useState(false);
 
@@ -23,22 +32,34 @@ const UserCard = ({ id, title, fullName, phoneNumber }) => {
           color={theme.palette.secondary[400]}
           gutterBottom
         >
-          {title} Details
+          {title}
         </Typography>
         <Typography
           sx={{ fontSize: 14 }}
           color={theme.palette.secondary[400]}
           gutterBottom
         >
-          {id}
+          Participant Test Id: {id}
         </Typography>
 
         <Typography sx={{ mt: "1.5rem" }} color={theme.palette.secondary[400]}>
-          Full Name: {fullName}
+          Participant User Id: {jobseekerId}
         </Typography>
 
         <Typography color={theme.palette.secondary[400]}>
-          Phone Number: {phoneNumber}
+          Score: {score}
+        </Typography>
+
+        <Typography color={theme.palette.secondary[400]}>
+          Status: {status}
+        </Typography>
+
+        <Typography color={theme.palette.secondary[400]}>
+          Started At: {startedAt}
+        </Typography>
+
+        <Typography color={theme.palette.secondary[400]}>
+          Completed At: {completedAt}
         </Typography>
       </CardContent>
     </Card>

@@ -3,7 +3,11 @@ import { ResponsivePie } from "@nivo/pie";
 import { Box, Typography, useTheme } from "@mui/material";
 import { useGetRapidRidesQuery, useGetSharedRidesQuery } from "state/api";
 
-const BreakdownChart = ({ isDashboard = false }) => {
+const BreakdownChart = ({
+  isDashboard = false,
+  totalRapidRidesFare,
+  totalSharedRidesFare,
+}) => {
   const isLoading = false;
   // const { data, isLoading } = useGetSalesQuery();
 
@@ -12,42 +16,11 @@ const BreakdownChart = ({ isDashboard = false }) => {
   const [sort, setSort] = useState({});
   const [search, setSearch] = useState("");
 
-  const { data: rapidRides, isLoading: isLoadingRapidRides } =
-    useGetRapidRidesQuery({
-      page,
-      pageSize,
-      sort: JSON.stringify(sort),
-      search,
-    });
-  const { data: sharedRides, isLoading: isLoadingSharedRides } =
-    useGetSharedRidesQuery({
-      page,
-      pageSize,
-      sort: JSON.stringify(sort),
-      search,
-    });
-
-  let totalRapidRidesFare = 0;
-  rapidRides?.data?.rides.map((ride) => {
-    if (ride.status === "closed") {
-      totalRapidRidesFare = totalRapidRidesFare + ride.fare;
-    }
-    return 0;
-  });
-
-  let totalSharedRidesFare = 0;
-  sharedRides?.data?.rides.map((ride) => {
-    if (ride.status === "closed") {
-      totalSharedRidesFare = totalSharedRidesFare + ride.fare;
-    }
-    return 0;
-  });
-
   const data = {
     totalSales: totalSharedRidesFare + totalRapidRidesFare,
     salesByCategory: {
-      "Shared Express": totalSharedRidesFare,
-      "Rapid Express": totalRapidRidesFare,
+      Jobseekers: totalSharedRidesFare,
+      Companies: totalRapidRidesFare,
     },
   };
 
@@ -176,7 +149,7 @@ const BreakdownChart = ({ isDashboard = false }) => {
         }}
       >
         <Typography variant="h6">
-          {!isDashboard && "Total:"} Rs.{data.totalSales}
+          {/* {!isDashboard && "Total:"} Rs.{data.totalSales} */}
         </Typography>
       </Box>
     </Box>

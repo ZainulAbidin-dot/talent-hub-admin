@@ -1,8 +1,16 @@
 import { useTheme } from "@emotion/react";
 import { Card, CardContent, Typography } from "@mui/material";
-import React, { useState } from "react";
+import React from "react";
 
-const UserDetailsCard = ({ id, name, email, cnicNumber, role, gender }) => {
+const TestDetailsCard = ({
+  id,
+  companyId,
+  name,
+  skills,
+  startedAt,
+  endedAt,
+  testNumber,
+}) => {
   const theme = useTheme();
 
   return (
@@ -10,6 +18,7 @@ const UserDetailsCard = ({ id, name, email, cnicNumber, role, gender }) => {
       sx={{
         maxWidth: 545,
         minWidth: 545,
+        marginTop: "1.5rem",
         backgroundImage: "none",
         backgroundColor: theme.palette.background.alt,
         borderRadius: "0.55rem",
@@ -21,30 +30,33 @@ const UserDetailsCard = ({ id, name, email, cnicNumber, role, gender }) => {
           color={theme.palette.secondary[400]}
           gutterBottom
         >
-          User Details
+          Test Details - {testNumber}
         </Typography>
         <Typography
           sx={{ fontSize: 14 }}
           color={theme.palette.secondary[400]}
           gutterBottom
-        ></Typography>
-        <Typography sx={{ mt: "1.5rem" }} color={theme.palette.secondary[400]}>
+        >
           Id: {id}
         </Typography>
-
-        <Typography sx={{ mt: "1.5rem" }} color={theme.palette.secondary[400]}>
-          Username: {name}
-        </Typography>
-
         <Typography color={theme.palette.secondary[400]}>
-          Email: {email}
+          Company Id: {companyId}
         </Typography>
-
         <Typography color={theme.palette.secondary[400]}>
-          Role: {role}
+          Test Name: {name}
+        </Typography>
+        <Typography color={theme.palette.secondary[400]}>
+          Skills: {skills.join(", ")}
+        </Typography>
+        <Typography color={theme.palette.secondary[400]}>
+          Test Starting Time: {startedAt}
+        </Typography>
+        <Typography color={theme.palette.secondary[400]}>
+          Test Ending Time: {endedAt}
         </Typography>
       </CardContent>
     </Card>
   );
 };
-export default UserDetailsCard;
+
+export default TestDetailsCard;

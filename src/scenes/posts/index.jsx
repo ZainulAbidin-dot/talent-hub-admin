@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Box, useTheme } from "@mui/material";
-import { useGetCustomersQuery } from "state/api";
+import { useDeletePostMutation, useGetPostsQuery } from "state/api";
 import Header from "components/Header";
 import { DataGrid } from "@mui/x-data-grid";
 import EditIcon from "@mui/icons-material/Edit";
@@ -15,24 +15,25 @@ import Avatar from "@mui/material/Avatar";
 import DataGridCustomToolbar from "components/DataGridCustomToolbar";
 import { VisibilityOutlined } from "@mui/icons-material";
 
-const Customers = ({ userType, roleForPage }) => {
+const Posts = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const theme = useTheme();
   const [search, setSearch] = useState("");
   const [searchInput, setSearchInput] = useState("");
 
-  const { data, isLoading } = useGetCustomersQuery(roleForPage);
+  const { data, isLoading } = useGetPostsQuery();
+  const [deletePost] = useDeletePostMutation();
 
   const columns = [
     {
       field: "profilePic",
-      headerName: "Profile Pic",
+      headerName: "Post Image",
       flex: 1,
       renderCell: (params) => {
         return (
           <>
-            <Avatar src={params.value} />
+            <Avatar src={params.row.postImage} />
           </>
         );
       },
@@ -44,23 +45,23 @@ const Customers = ({ userType, roleForPage }) => {
       editable: true,
     },
     {
-      field: "username",
-      headerName: "Name",
+      field: "companyId",
+      headerName: "Company Id",
       flex: 1,
     },
     {
-      field: "email",
-      headerName: "Email",
+      field: "title",
+      headerName: "Title",
       flex: 1,
     },
     {
-      field: "emailVerified",
-      headerName: "Email Verified",
+      field: "content",
+      headerName: "Content",
       flex: 1,
     },
     {
-      field: "role",
-      headerName: "Role",
+      field: "createdAt",
+      headerName: "Created At",
       flex: 1,
     },
     {
@@ -98,16 +99,15 @@ const Customers = ({ userType, roleForPage }) => {
             icon={<VisibilityOutlined />}
             label="Edit"
             className="textPrimary"
-            aria-label="View"
             onClick={() => handleEditClick(params.row.id, params.row.role)}
             color="inherit"
           />,
-          // <GridActionsCellItem
-          //   icon={<DeleteIcon />}
-          //   label="Delete"
-          //   onClick={() => handleDeleteClick(params.row.id)}
-          //   color="inherit"
-          // />,
+          <GridActionsCellItem
+            icon={<DeleteIcon />}
+            label="Delete"
+            onClick={() => handleDeleteClick(params.row.id)}
+            color="inherit"
+          />,
         ];
       },
     },
@@ -118,12 +118,26 @@ const Customers = ({ userType, roleForPage }) => {
   const handleEditClick = (id, role) => {
     console.log(role, id);
     dispatch(setCustomerId(id));
-    navigate(`/single-customer/${id}`, { state: { customerId: id } });
+    navigate(`/single-post/${id}`, { state: { test: id } });
   };
 
   const handleCancelClick = () => {};
 
-  const handleDeleteClick = () => {};
+  const handleDeleteClick = (targetPostId) => {
+    deletePost(targetPostId)
+      .then((res) => {
+        if (res.error) {
+          alert(res.error.data.message);
+        }
+        if (res.data === null) {
+          alert("Post Deleted Successfully");
+          window.location.reload();
+        }
+      })
+      .catch((err) => {
+        console.log("Error while deleting a Post");
+      });
+  };
 
   let modifiedData =
     data?.data?.map((element) => ({
@@ -133,7 +147,7 @@ const Customers = ({ userType, roleForPage }) => {
 
   return (
     <Box m="1.5rem 2.5rem">
-      <Header title={userType} subtitle={"List of " + userType} />
+      <Header title="Posts" subtitle={"List of Posts"} />
       <Box
         mt="40px"
         height="75vh"
@@ -177,4 +191,4 @@ const Customers = ({ userType, roleForPage }) => {
   );
 };
 
-export default Customers;
+export default Posts;

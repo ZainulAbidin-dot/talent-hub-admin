@@ -1,137 +1,126 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 
+const baseQuery = fetchBaseQuery({
+  baseUrl: localStorage.getItem('baseUrl'),
+  credentials: 'include',
+  mode: 'cors',
+  prepareHeaders: (headers) => {
+    const token = localStorage.getItem('token');
+    headers.set('authorization', `Bearer ${token}`);
+    return headers;
+  },
+});
+
+
+const baseQueryWithReauth = async (args, api, extraOptions) => {
+  let result = await baseQuery(args, api, extraOptions);
+  console.log(result);
+
+  if (result?.error?.status === 403 || result?.error?.status === 401) {
+    console.log('sending refresh token');
+
+    const refreshResult = await baseQuery('/auth/refresh', api, extraOptions);
+    console.log(refreshResult.error.data.message);
+
+    if (refreshResult?.data) {
+      localStorage.setItem('token', refreshResult?.data?.accessToken);
+      result = await baseQuery(args, api, extraOptions);
+    } else {
+      console.log('Error occured using refresh token');
+
+      // dispatch(setAuthToken(null));
+      // localStorage.removeItem("token");
+      // localStorage.removeItem("baseUrl");
+      // localStorage.removeItem("roles");
+      // localStorage.removeItem("fullName");
+      // navigate("/login");
+
+
+    }
+  }
+
+  return result;
+}
+
+
 export const api = createApi({
-  baseQuery: fetchBaseQuery({
-    baseUrl: localStorage.getItem('baseUrl'),
-    prepareHeaders: (headers) => {
-      const token = localStorage.getItem('token');
-      headers.set('authorization', `Bearer ${token}`);
-      return headers;
-    },
-  }),
+  baseQuery: baseQueryWithReauth,
   reducerPath: 'adminApi',
   tagTypes: [
     'User',
     'Products',
     'Customers',
     'SingleCustomer',
-    'SingleRide',
-    'SharedRides',
-    'RapidRides',
-    'LiveRides',
-    'Transactions',
-    'Geography',
-    'Sales',
-    'Admins',
-    'Performance',
+    'Tests',
+    'SingleTest',
+    'Posts',
+    'SinglePost',
     'Discount',
     'Dashboard',
-    'TopUp',
-    'SingleTopUp',
-    'Reports',
-    'SingleReport',
   ],
   endpoints: (build) => ({
     getUser: build.query({
-      query: (id) => `admin/users/${id}`,
+      query: (id) => `/admin/users/${id}`,
       providesTags: ['User'],
     }),
-    getProducts: build.query({
-      query: () => 'client/products',
-      providesTags: ['Products'],
-    }),
     getCustomers: build.query({
-      query: (role) => `admin/users?role=${role}`,
-      providesTags: ['Customers'],
-    }),
-    getSingleCustomer: build.query({
-      query: (id) => `admin/users/${id}`,
-      providesTags: ['SingleCustomer'],
-    }),
-    getSingleRide: build.query({
-      query: ({ id, type }) => {
+      query: (roleForPage) => {
         return {
-          url: type === 'sharedExpress' ? `admin/shared-rides/${id}` : `admin/rapid-rides/${id}`,
+          url: `/admin/users?role=${roleForPage}`,
           method: 'GET',
         };
       },
-      providesTags: ['SingleRide'],
+      providesTags: ['Customers'],
     }),
-    getSharedRides: build.query({
-      query: ({ page = 0, pageSize = 0, sort = 0, search = 'a' }) => `admin/shared-rides`,
-      providesTags: ['SharedRides'],
+    getSingleCustomer: build.query({
+      query: (id) => `/admin/user/${id}`,
+      providesTags: ['SingleCustomer'],
     }),
-    getRapidRides: build.query({
-      query: ({ page = 0, pageSize = 0, sort = 0, search = 'a' }) => `admin/rapid-rides`,
-      providesTags: ['RapidRides'],
+    getTests: build.query({
+      query: () => {
+        return {
+          url: `/admin/tests`,
+          method: 'GET',
+        };
+      },
+      providesTags: ['Tests'],
     }),
-    getLiveRides: build.query({
-      query: () => `admin/active-rides`,
-      providesTags: ['LiveRides'],
+    getSingleTest: build.query({
+      query: (id) => `/admin/test/${id}`,
+      providesTags: ['SingleTest'],
     }),
-    getTransactions: build.query({
-      query: ({ page, pageSize, sort, search }) => ({
-        url: 'admin/fares',
-        method: 'GET',
-        // params: { page, pageSize, sort, search },
+    getPosts: build.query({
+      query: () => {
+        return {
+          url: `/admin/posts`,
+          method: 'GET',
+        };
+      },
+      providesTags: ['Posts'],
+    }),
+    getSinglePost: build.query({
+      query: (id) => `/admin/post/${id}`,
+      providesTags: ['SinglePost'],
+    }),
+
+
+
+    deletePost: build.mutation({
+      query: (testId) => ({
+        url: `companies/delete-post/${testId}`,
+        method: 'DELETE',
       }),
-      providesTags: ['Transactions'],
+      invalidatesTags: ['Documents', 'SingleCustomer'],
     }),
-    getGeography: build.query({
-      query: () => 'client/geography',
-      providesTags: ['Geography'],
-    }),
-    getSales: build.query({
-      query: () => 'sales/sales',
-      providesTags: ['Sales'],
-    }),
-    getAdmins: build.query({
-      query: () => 'management/admins',
-      providesTags: ['Admins'],
-    }),
-    getUserPerformance: build.query({
-      query: (id) => `management/performance/${id}`,
-      providesTags: ['Performance'],
-    }),
-    getDiscount: build.query({
-      query: () => `admin/discount-codes`,
-      providesTags: ['Discount'],
-    }),
-    getDashboard: build.query({
-      query: () => 'general/dashboard',
-      providesTags: ['Dashboard'],
-    }),
-    getTopUp: build.query({
-      query: () => 'admin/topups',
-      providesTags: ['TopUp'],
-    }),
-    getSingleTopUp: build.query({
-      query: (id) => `admin/topups/${id}`,
-      providesTags: ['SingleTopUp'],
-    }),
-    getReports: build.query({
-      query: () => 'admin/report-tickets',
-      providesTags: ['Reports'],
-    }),
-    getSingleReport: build.query({
-      query: (id) => `admin/report-tickets/${id}`,
-      providesTags: ['SingleReport'],
-    }),
-
-    getAllDocumentsByUserId: build.query({
-      query: (id) => `admin/documents?userId=${id}`,
-      providesTags: ['Documents', 'SingleCustomer'],
-    }),
-
-    updateDocument: build.mutation({
-      query: ({ formData }) => ({
-        url: `admin/documents/status`,
-        method: 'PATCH',
-        body: formData,
+    deleteTest: build.mutation({
+      query: (testId) => ({
+        url: `companies/delete-test/${testId}`,
+        method: 'DELETE',
       }),
       invalidatesTags: ['Documents', 'SingleCustomer'],
     })
   }),
+
 });
 
 export const {
@@ -139,21 +128,10 @@ export const {
   useGetProductsQuery,
   useGetCustomersQuery,
   useGetSingleCustomerQuery,
-  useGetSingleRideQuery,
-  useGetSharedRidesQuery,
-  useGetRapidRidesQuery,
-  useGetLiveRidesQuery,
-  useGetTransactionsQuery,
-  useGetGeographyQuery,
-  useGetSalesQuery,
-  useGetAdminsQuery,
-  useGetUserPerformanceQuery,
-  useGetDiscountQuery,
-  useGetDashboardQuery,
-  useGetTopUpQuery,
-  useGetSingleTopUpQuery,
-  useGetAllDocumentsByUserIdQuery,
-  useGetReportsQuery,
-  useGetSingleReportQuery,
-  useUpdateDocumentMutation
+  useGetTestsQuery,
+  useGetSingleTestQuery,
+  useGetPostsQuery,
+  useGetSinglePostQuery,
+  useDeletePostMutation,
+  useDeleteTestMutation
 } = api;

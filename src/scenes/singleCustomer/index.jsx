@@ -9,32 +9,31 @@ import {
   CardMedia,
 } from "@mui/material";
 import Header from "components/Header";
-import profileImage from "assets/profile.jpg";
 import { useParams } from "react-router-dom";
 import Dialog from "@mui/material/Dialog";
 import DialogContent from "@mui/material/DialogContent";
 import DialogTitle from "@mui/material/DialogTitle";
 import axios from "axios";
 import { useSelector } from "react-redux";
-import Documents from "./Documents";
 import UserDetailsCard from "./UserDetailsCard";
-import PassengerDetailsCard from "./PassengerDetailsCard";
-import DriverDetailsCard from "./DriverDetailsCard";
-import VehicleDetailsCard from "./VehicleDetailsCard";
+import CompanyDetailsCard from "./CompanyDetailsCard";
+import JobseekerDetailsCard from "./JobseekerDetailsCard";
+import TestDetailsCard from "./TestDetailsCard";
+import profileImage from "assets/profile.jpg";
 
 const SingleCustomer = () => {
   const theme = useTheme();
   const { id } = useParams();
   const { data, isLoading, refetch } = useGetSingleCustomerQuery(id);
   const [formData, setFormData] = useState(null);
-  const [hovered, setHovered] = useState(false);
   const [openModal, setOpenModal] = useState(false);
-  const [modalImage, setModalImage] = useState("");
+  const [hovered, setHovered] = useState(false);
+  const [modalImage, setModalImage] = useState(null);
   const [updatedDriverProfileStatus, setUpdatedDriverProfileStatus] =
     useState(null);
   const [updatedPassengerProfileStatus, setUpdatedPassengerProfileStatus] =
     useState(null);
-  const [updatedVehicleStatus, setUpdatedVehicleStatus] = useState({
+  const [updatedsingleTestStatus, setUpdatedsingleTestStatus] = useState({
     id: null,
     status: null,
   });
@@ -58,18 +57,14 @@ const SingleCustomer = () => {
 
   useEffect(() => {
     if (!isLoading && data != null && data !== undefined) {
-      console.log(data.data.user.data);
+      console.log(data.data);
       setFormData({
-        id: data.data.user.data.id,
-        name: data.data.user.data.fullName,
-        email: data.data.user.data.email,
-        phoneNumber: data.data.user.data.phoneNumber,
-        role: data.data.user.data.roles.join(", "),
-        profilePic: data.data.user.data.profilePic,
-        gender: data.data.user.data.gender === "F" ? "Female" : "Male",
-        driverProfile: data.data.user.data.driverProfile,
-        passengerProfile: data.data.user.data.passengerProfile,
-        cnicNumber: data.data.user.data.cnicNumber,
+        id: data.data.id,
+        name: data.data.username,
+        email: data.data.email,
+        role: data.data.role,
+        jobseeker: data.data.jobseeker,
+        company: data.data.company,
       });
     }
   }, [isLoading, data]);
@@ -80,11 +75,7 @@ const SingleCustomer = () => {
 
   const handleUpdatedStatusSubmit = async (e) => {
     e.preventDefault();
-    console.log(
-      updatedDriverProfileStatus,
-      updatedPassengerProfileStatus,
-      updatedVehicleStatus
-    );
+    console.log(updatedDriverProfileStatus, updatedPassengerProfileStatus);
 
     if (updatedDriverProfileStatus != null) {
       try {
@@ -134,36 +125,10 @@ const SingleCustomer = () => {
       }
     }
 
-    if (
-      updatedVehicleStatus.id != null &&
-      updatedVehicleStatus.status != null
-    ) {
-      try {
-        const response = await axios.patch(
-          `${localStorage.getItem("baseUrl")}admin/vehicles/${
-            updatedVehicleStatus.id
-          }`,
-          {
-            status: updatedVehicleStatus.status,
-          },
-          {
-            headers: {
-              Authorization: `Bearer ${accessToken}`,
-              "Content-Type": "application/json",
-            },
-          }
-        );
-        console.log(response);
-        alert(response.data.message);
-        refetch();
-      } catch (error) {
-        console.log(error);
-        console.log(error.message);
-      }
-    }
-
     // window.location.reload();
   };
+
+  console.log("User : ", data);
 
   return (
     <Box m="1.5rem 2.5rem">
@@ -208,19 +173,19 @@ const SingleCustomer = () => {
               justifyContent="center"
               flexWrap="wrap"
             >
-              {formData.profilePic ? (
+              {/* For Profile Picture */}
+              {formData.jobseeker ? (
                 <Card
                   variant="outlined"
                   style={{
-                    height: "50vh",
                     backgroundColor: "transparent",
-                    width: "70vw",
                     display: "flex",
                     flexDirection: "column",
                     alignItems: "center",
                     justifyContent: "center",
-                    margin: "0",
-                    position: "relative", // Added to position the overlay properly
+                    marginBottom: "1rem",
+                    padding: "1rem 2rem",
+                    position: "relative",
                   }}
                   onMouseEnter={() => setHovered(true)}
                   onMouseLeave={() => setHovered(false)}
@@ -233,18 +198,71 @@ const SingleCustomer = () => {
                   <CardMedia
                     component="img"
                     style={{
-                      height: hovered ? 200 : 140, // Adjust the size as needed
-                      width: hovered ? 200 : 140,
-                      transition: "all 0.3s", // Add smooth transition
-                      borderRadius: "50%", // To make it a circular image
+                      height: 200,
+                      width: 200,
+                      borderRadius: "50%",
                       cursor: "pointer",
                     }}
                     onClick={() => {
-                      setModalImage(formData.profilePic || profileImage);
+                      setModalImage(formData.jobseeker.profileImage);
                       setOpenModal(true);
                     }}
-                    image={formData.profilePic || profileImage}
+                    image={formData.jobseeker.profileImage || profileImage}
                     title="User Image"
+                  />
+                </Card>
+              ) : null}
+
+              {/* For Company Logo and Cover Image */}
+              {formData.company?.logo ? (
+                <Card
+                  variant="outlined"
+                  style={{
+                    backgroundColor: "transparent",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    marginBottom: "1rem",
+                    padding: "1rem 2rem",
+                    position: "relative",
+                  }}
+                  onMouseEnter={() => setHovered(true)}
+                  onMouseLeave={() => setHovered(false)}
+                >
+                  <CardContent>
+                    <Typography gutterBottom variant="h3" component="div">
+                      Logo And Cover Image
+                    </Typography>
+                  </CardContent>
+                  <CardMedia
+                    component="img"
+                    style={{
+                      height: 200,
+                      width: 200,
+                      borderRadius: "50%",
+                      cursor: "pointer",
+                    }}
+                    onClick={() => {
+                      setModalImage(formData.company.logo);
+                      setOpenModal(true);
+                    }}
+                    image={formData.company.logo || profileImage}
+                    title="Logo Image"
+                  />
+                  <CardMedia
+                    component="img"
+                    style={{
+                      height: 200,
+                      width: 200,
+                      borderRadius: "50%",
+                      cursor: "pointer",
+                    }}
+                    onClick={() => {
+                      setModalImage(formData.company.coverImage);
+                      setOpenModal(true);
+                    }}
+                    image={formData.company.coverImage || profileImage}
+                    title="Cover Image"
                   />
                 </Card>
               ) : null}
@@ -254,53 +272,62 @@ const SingleCustomer = () => {
                   key={id}
                   id={id}
                   name={formData.name}
-                  cnicNumber={formData.cnicNumber}
                   email={formData.email}
                   role={formData.role}
-                  gender={formData.gender}
                 />
               ) : null}
 
-              {formData.passengerProfile ? (
-                <PassengerDetailsCard
-                  id={formData.passengerProfile.id}
-                  status={formData.passengerProfile.status}
-                  statusType={statusType}
-                  handleUpdatedStatusSubmit={handleUpdatedStatusSubmit}
-                  setUpdatedPassengerProfileStatus={
-                    setUpdatedPassengerProfileStatus
+              {formData.company ? (
+                <CompanyDetailsCard
+                  id={formData.company.id}
+                  name={formData.company.name}
+                  description={formData.company.description}
+                  contactNumber={formData.company.contactNumber}
+                  country={formData.company.country}
+                  city={formData.company.city}
+                  size={formData.company.size}
+                  verified={formData.company.verified}
+                  logo={formData.company.logo}
+                  coverImage={formData.company.coverImage}
+                  instagramUrl={formData.company.instagramUrl}
+                  facebookUrl={formData.company.facebookUrl}
+                  linkedInUrl={formData.company.linkedInUrl}
+                  twitterUrl={formData.company.twitterUrl}
+                  website={formData.company.website}
+                  foundedYear={formData.company.foundedYear}
+                />
+              ) : null}
+
+              {formData.jobseeker ? (
+                <JobseekerDetailsCard
+                  id={formData.jobseeker.id}
+                  name={
+                    formData.jobseeker.firstName +
+                    " " +
+                    formData.jobseeker.lastName
                   }
+                  contactNumber={formData.jobseeker.contactNumber}
+                  country={formData.jobseeker.country}
+                  city={formData.jobseeker.city}
+                  education={formData.jobseeker.education}
+                  experience={formData.jobseeker.experience}
+                  profileImage={formData.jobseeker.profileImage}
+                  resume={formData.jobseeker.resume}
+                  skills={formData.jobseeker.skills}
                 />
               ) : null}
 
-              {formData.driverProfile ? (
-                <DriverDetailsCard
-                  id={formData.driverProfile.id}
-                  status={formData.driverProfile.status}
-                  statusType={statusType}
-                  handleUpdatedStatusSubmit={handleUpdatedStatusSubmit}
-                  setUpdatedDriverProfileStatus={setUpdatedDriverProfileStatus}
-                />
-              ) : null}
-
-              {formData.driverProfile &&
-              formData.driverProfile.vehicles.length > 0
-                ? formData.driverProfile.vehicles.map((vehicle, index) => (
-                    <VehicleDetailsCard
+              {formData.company && formData.company?.test.length > 0
+                ? formData?.company?.test.map((singleTest, index) => (
+                    <TestDetailsCard
                       key={index}
-                      id={vehicle.id}
-                      isSelected={vehicle.selected}
-                      color={vehicle.color}
-                      model={vehicle.model}
-                      year={vehicle.year}
-                      noOfSeats={vehicle.noOfSeats}
-                      engineCapacity={vehicle.engineCapacity}
-                      isAcAvailable={vehicle.isAcAvailable}
-                      isTrunkAvailable={vehicle.isTrunkAvailable}
-                      licensePlateNumber={vehicle.licensePlateNumber}
-                      status={vehicle.status}
-                      handleUpdatedStatusSubmit={handleUpdatedStatusSubmit}
-                      setUpdatedVehicleStatus={setUpdatedVehicleStatus}
+                      testNumber={index + 1}
+                      id={singleTest.id}
+                      companyId={singleTest.companyId}
+                      name={singleTest.name}
+                      skills={singleTest.skills}
+                      startedAt={singleTest.startedAt}
+                      endedAt={singleTest.endedAt}
                     />
                   ))
                 : null}
@@ -318,8 +345,6 @@ const SingleCustomer = () => {
             </Dialog>
           </>
         )}
-
-        <Documents />
       </Box>
     </Box>
   );

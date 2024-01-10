@@ -29,7 +29,7 @@ function Copyright(props) {
     >
       {"Copyright © "}
       <Link color="inherit" href="https://pirayo.com/">
-        Pirayo
+        Talent Hub
       </Link>{" "}
       {new Date().getFullYear()}
       {"."}
@@ -44,129 +44,39 @@ const defaultTheme = createTheme();
 export default function Login() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const [phoneNumber, setPhoneNumber] = useState("");
-  const [url, setUrl] = useState("Please select a server...");
 
   const [anchorEl2, setAnchorEl2] = useState(null);
   const isOpen2 = Boolean(anchorEl2);
-  const handleClick2 = (event) => setAnchorEl2(event.currentTarget);
-  const handleClose2 = (e, url) => {
-    e.preventDefault();
-    if (url === "backdropClick") {
-      setAnchorEl2(null);
-      return;
-    }
-    localStorage.setItem("baseUrl", url);
-    setUrl(url);
-    setAnchorEl2(null);
-  };
 
-  const handleSubmitPhoneNumber = async (event) => {
-    event.preventDefault();
-    if (localStorage.getItem("baseUrl") === null) {
-      alert("Please select a server...");
-      return;
-    }
-
-    const data = new FormData(event.currentTarget);
-    setPhoneNumber(data.get("phoneNumber").replaceAll(" ", ""));
-
-    await axios
-      .post(`${localStorage.getItem("baseUrl")}auth/phone-number`, {
-        phoneNumber: data.get("phoneNumber").replaceAll(" ", ""),
-      })
-      .then((res) => {
-        console.log(res.data);
-        alert(`OTP sent ${res.data.devOnlyData.otpCode}`);
-      })
-      .catch((err) => {
-        console.log(err.message);
-      });
-  };
-
-  const handleSubmitOTPCode = async (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
 
-    if (localStorage.getItem("baseUrl") === null) {
-      alert("Please select a server...");
-      return;
-    }
     const data = new FormData(event.currentTarget);
 
     await axios
-      .post(`${localStorage.getItem("baseUrl")}auth/otp`, {
-        otpCode: data.get("otpCode").replaceAll(" ", ""),
-        phoneNumber: phoneNumber,
-        fcmToken: "qwdf",
+      .post(`http://127.0.0.1:8000/api/v1/auth/login`, {
+        email: data.get("email"),
+        password: data.get("password"),
       })
       .then((res) => {
-        console.log(res, res.data);
-        if (res.data?.data?.token) {
-          dispatch(setUserId(res.data.data.user.id));
-          dispatch(setAuthToken(res.data.data.token));
-          localStorage.setItem("token", res.data.data.token);
-          localStorage.setItem("fullName", res.data.data.user.data.fullName);
-          localStorage.setItem("roles", res.data.data.user.data.roles);
-          // localStorage.setItem(
-          //   "baseUrl",
-          //   "https://xxtmw06j-3002.inc1.devtunnels.ms/"
-          // );
-          dispatch(setPathName("dashboard"));
-          navigate("/dashboard");
-        }
+        alert(`Token ${res.data.data.accessToken}`);
+
+        localStorage.setItem("fullName", "Admin");
+        localStorage.setItem("roles", "admin");
+        localStorage.setItem("baseUrl", "http://127.0.0.1:8000/api/v1");
+        dispatch(setUserId(res.data.data.user.id));
+        dispatch(setAuthToken(res.data.data.token));
+        localStorage.setItem("token", res.data.data.accessToken);
+        dispatch(setPathName("dashboard"));
+        navigate("/dashboard");
       })
       .catch((err) => {
-        console.log(err.message);
+        console.log(err);
       });
   };
 
   return (
     <ThemeProvider theme={defaultTheme}>
-      <Toolbar sx={{ justifyContent: "space-between" }}>
-        <FlexBetween>
-          <IconButton onClick={handleClick2}>
-            <SettingsOutlined sx={{ fontSize: "25px" }} />
-            <Typography
-              sx={{
-                fontSize: "14px",
-                fontWeight: "bold",
-              }}
-            >
-              {url}
-            </Typography>
-          </IconButton>
-          <Menu
-            anchorEl={anchorEl2}
-            open={isOpen2}
-            onClose={handleClose2}
-            anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-          >
-            <MenuItem
-              onClick={(e) =>
-                handleClose2(e, process.env.REACT_APP_API_URL_LOCAL)
-              }
-            >
-              Local Url
-            </MenuItem>
-
-            <MenuItem
-              onClick={(e) =>
-                handleClose2(e, process.env.REACT_APP_API_URL_PORT_FORWARD)
-              }
-            >
-              Dev Url
-            </MenuItem>
-
-            <MenuItem
-              onClick={(e) =>
-                handleClose2(e, process.env.REACT_APP_API_URL_LIVE)
-              }
-            >
-              Production Url
-            </MenuItem>
-          </Menu>
-        </FlexBetween>
-      </Toolbar>
       <Grid container component="main" sx={{ height: "100vh" }}>
         <CssBaseline />
         <Grid
@@ -202,39 +112,24 @@ export default function Login() {
             <Typography component="h1" variant="h5">
               Sign in
             </Typography>
-            <Box
-              component="form"
-              onSubmit={handleSubmitPhoneNumber}
-              sx={{ mt: 1 }}
-            >
+            <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1 }}>
               <TextField
                 margin="normal"
                 required
                 fullWidth
-                id="number"
-                label="Whatsapp Number"
-                name="phoneNumber"
+                id="email"
+                label="Email"
+                name="email"
                 // autoComplete="number"
                 autoFocus
               />
-              <Button
-                type="submit"
-                fullWidth
-                variant="contained"
-                sx={{ mt: 3, mb: 2 }}
-              >
-                Submit Whatsapp Number
-              </Button>
-            </Box>
-
-            <Box component="form" onSubmit={handleSubmitOTPCode} sx={{ mt: 1 }}>
               <TextField
                 margin="normal"
                 required
                 fullWidth
-                name="otpCode"
-                label="OTP Code"
-                id="otpCode"
+                name="password"
+                label="Password"
+                id="password"
                 // autoComplete="current-password"
               />
               <Button
@@ -243,7 +138,7 @@ export default function Login() {
                 variant="contained"
                 sx={{ mt: 3, mb: 2 }}
               >
-                Submit OTP Code
+                Submit
               </Button>
               <Copyright sx={{ mt: 5 }} />
             </Box>

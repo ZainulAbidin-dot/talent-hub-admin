@@ -39,72 +39,24 @@ const navItems = [
     icon: null,
   },
   {
-    text: "Drivers",
+    text: "Companies",
     icon: <Groups2Outlined />,
   },
   {
-    text: "Passengers",
+    text: "Jobseekers",
     icon: <Groups2Outlined />,
-  },
-  {
-    text: "Transactions",
-    icon: <ReceiptLongOutlined />,
-  },
-  {
-    text: "Reviews",
-    icon: <ShoppingCartOutlined />,
-  },
-  {
-    text: "Rides",
-    icon: null,
-  },
-  {
-    text: "Shared-Rides",
-    icon: <AdminPanelSettingsOutlined />,
-  },
-  {
-    text: "Rapid-Rides",
-    icon: <TrendingUpOutlined />,
-  },
-  {
-    text: "Live-Rides",
-    icon: <PublicOutlined />,
-  },
-  {
-    text: "Sales",
-    icon: null,
-  },
-  // {
-  //   text: "Overview",
-  //   icon: <PointOfSaleOutlined />,
-  // },
-  // {
-  //   text: "Daily",
-  //   icon: <TodayOutlined />,
-  // },
-  // {
-  //   text: "Monthly",
-  //   icon: <CalendarMonthOutlined />,
-  // },
-  {
-    text: "Breakdown",
-    icon: <PieChartOutlined />,
   },
   {
     text: "Management",
     icon: null,
   },
   {
-    text: "Discount",
-    icon: <DiscountOutlined />,
-  },
-  {
-    text: "Top-Up",
-    icon: <TopicOutlined />,
-  },
-  {
-    text: "Reports",
+    text: "Jobs",
     icon: <ReceiptLongOutlined />,
+  },
+  {
+    text: "Posts",
+    icon: <TopicOutlined />,
   },
 ];
 
@@ -190,7 +142,7 @@ const Sidebar = ({
               <FlexBetween color={theme.palette.secondary.main}>
                 <Box display="flex" alignItems="center" gap="0.5rem">
                   <Typography variant="h4" fontWeight="bold">
-                    PIRAYO ADMIN
+                    TALENT-HUB
                   </Typography>
                 </Box>
                 {!isNonMobile && (

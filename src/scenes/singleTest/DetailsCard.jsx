@@ -2,16 +2,7 @@ import { useTheme } from "@emotion/react";
 import { Card, CardContent, Typography } from "@mui/material";
 import React, { useState } from "react";
 
-const DetailsCard = ({
-  id,
-  title,
-  description,
-  status,
-  priority,
-  createdAt,
-  rideId,
-  rideType,
-}) => {
+const DetailsCard = ({ id, name, skills, startedAt, endedAt }) => {
   const theme = useTheme();
   const [isExpanded, setIsExpanded] = useState(false);
 
@@ -31,42 +22,30 @@ const DetailsCard = ({
           color={theme.palette.secondary[400]}
           gutterBottom
         >
-          Report Details
+          Job Details
         </Typography>
         <Typography
           sx={{ fontSize: 14 }}
           color={theme.palette.secondary[400]}
           gutterBottom
         >
-          {id}
+          Job Id: {id}
         </Typography>
 
         <Typography sx={{ mt: "1.5rem" }} color={theme.palette.secondary[400]}>
-          Title: {title}
+          Job Name: {name}
         </Typography>
 
         <Typography color={theme.palette.secondary[400]}>
-          Description: {description}
+          Skills: {skills}
         </Typography>
 
         <Typography color={theme.palette.secondary[400]}>
-          Status: {status}
+          Starting Date: {startedAt}
         </Typography>
 
         <Typography color={theme.palette.secondary[400]}>
-          Priority: {priority}
-        </Typography>
-
-        <Typography color={theme.palette.secondary[400]}>
-          Created At: {createdAt}
-        </Typography>
-
-        <Typography color={theme.palette.secondary[400]}>
-          Ride Id: {rideId}
-        </Typography>
-
-        <Typography color={theme.palette.secondary[400]}>
-          Ride Type: {rideType}
+          Ending Date: {endedAt}
         </Typography>
       </CardContent>
     </Card>
