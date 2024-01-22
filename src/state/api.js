@@ -11,7 +11,6 @@ const baseQuery = fetchBaseQuery({
   },
 });
 
-
 const baseQueryWithReauth = async (args, api, extraOptions) => {
   let result = await baseQuery(args, api, extraOptions);
   console.log(result);
@@ -34,14 +33,11 @@ const baseQueryWithReauth = async (args, api, extraOptions) => {
       // localStorage.removeItem("roles");
       // localStorage.removeItem("fullName");
       // navigate("/login");
-
-
     }
   }
 
   return result;
-}
-
+};
 
 export const api = createApi({
   baseQuery: baseQueryWithReauth,
@@ -103,24 +99,21 @@ export const api = createApi({
       providesTags: ['SinglePost'],
     }),
 
-
-
     deletePost: build.mutation({
       query: (testId) => ({
-        url: `companies/delete-post/${testId}`,
+        url: `admin/post/${testId}`,
         method: 'DELETE',
       }),
       invalidatesTags: ['Documents', 'SingleCustomer'],
     }),
     deleteTest: build.mutation({
       query: (testId) => ({
-        url: `companies/delete-test/${testId}`,
+        url: `admin/job/${testId}`,
         method: 'DELETE',
       }),
       invalidatesTags: ['Documents', 'SingleCustomer'],
-    })
+    }),
   }),
-
 });
 
 export const {
@@ -133,5 +126,5 @@ export const {
   useGetPostsQuery,
   useGetSinglePostQuery,
   useDeletePostMutation,
-  useDeleteTestMutation
+  useDeleteTestMutation,
 } = api;
